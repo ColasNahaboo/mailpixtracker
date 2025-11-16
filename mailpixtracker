@@ -3,7 +3,7 @@
 # https://github.com/ColasNahaboo/mailpixtracker
 # (c) 2025 Colas Nahaboo
 # License: GPL v3
-export VERSION=1.0.1
+export VERSION=1.0.2
 
 # parameters of the request
 # url/mailpixtracker            # main menu
@@ -17,6 +17,7 @@ name="${SCRIPT_NAME##*/}"       # the name of the script, can be anything
 url="$ROOT_URL$SCRIPT_NAME"     # its URL
 params="$PATH_INFO"             # arguments of the request
 
+config="$name.conf"             # EDIT BY HAND to have the config file elsewhere
 #############################################################################
 # config vars, can be redefined in config file mailpixtracker.conf
 export TZ=                      # timezone used for dates in logs
@@ -33,7 +34,7 @@ export footer=                  # optional footer code at end of html body
 
 # load config file if present as a bash script to redefine the above vars
 # shellcheck disable=SC1090 # Ok to not check included file syntax
-[[ -e "$name.conf" ]] && . "$name.conf"
+[[ -e "$config" ]] && . "$config"
 
 ################################# No params: menu
 if [[ -z "$params" ]]; then
@@ -63,6 +64,8 @@ if [[ "$params" = /new ]]; then
     id=0
     [[ -s "$dir/$name-n" ]] && id=$(cat "$dir/$name-n")
     ((id++))
+    mkdir -p "$dir"
+    echo "$id" >"$dir/$name-n"
     echo "Location:$url/id/$id"; echo
     exit 0
 fi
@@ -72,6 +75,7 @@ fi
 if [[ $params =~ /id/([[:digit:]]+)$ ]]; then
     id="${BASH_REMATCH[1]}"
     title="Mail Pixel Tracker for ID # $id"
+    mkdir -p "$dir"
     echo "Content-Type:text/html"; echo
     echo "<!doctype html><head>$style<title>$title</title></head><body>$header"
     echo "$id" >"$dir/$name-n"
@@ -116,6 +120,7 @@ if [[ $params =~ /pix/([[:digit:]]+)$ ]]; then
     echo "$date [$REMOTE_ADDR] ($clientname) - $HTTP_USER_AGENT" >>"$dir/$name-log/$id"
     echo 'Content-Type:image/png'; echo
     [[ -e "$dir/$name-1px.png" ]] || # cache 1x1 transparent pixel PNG if needed
+        mkdir -p "$dir"
 	base64 -d <<<'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==' >"$dir/$name-1px.png"
     cat "$dir/$name-1px.png"
     exit 0

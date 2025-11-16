@@ -21,6 +21,7 @@ Note that the tracking is not foolproof. Most mailers nowadays prompt the user b
 ## Configuration
 
 In the same directory where you put the mailtracker script, you can add a config file with the same name but with .conf appended. E.g: "my-mpt.conf"
+If you do not want a non-cgi script in this dir, just edit the `config` variable definition in the script, remembering to re-edit after an upgrade.
 
 This script will be interpreted as a bash script, so you can redefine global variables listed in the script under the comment "# config vars"
 
@@ -33,7 +34,9 @@ dateformat='%Y-%m-%dT%H:%M:%S'
 style='<style>html {font-family: verdana,arial,geneva,helvetica,sans-serif;}</style>'
 ```
 
-## Exemple
+Note that by default, mailpixtracker will create some files and a directory (all starting by the same name as the script itself) in the installation directory. You can change this via the `dir` config variable.
+
+## Example
 
 The page for the tracker of ID 14 and its access logs:
 
@@ -43,6 +46,15 @@ The page for the tracker of ID 14 and its access logs:
 
 [Source repository](https://github.com/ColasNahaboo/mailpixtracker)
 
+## Technical details
+
+Files auto-created in `dir` (default is the same cgi-bin directory where mailpixtracker has been installed):
+
+- `mailpixtracker-n` caches the id of the last created tracker
+- `mailpixtracker-1pix.png` caches the transprent 1-pixel image used as a tracker in emails
+- `mailpixtracker-log/NN` the log (one entry per line) of access to the tracker for id `NN`
+
 ## History
 
-- v1.0.0 2025-11-16 Initial released version
+- v1.0.2 2025-11-16 autocreate `$dir` if needed.
+- v1.0.0 2025-11-16 Initial released version.

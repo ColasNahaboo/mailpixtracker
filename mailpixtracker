@@ -1,0 +1,127 @@
+#!/bin/bash
+# Mail Pix(el) Tracker
+# https://github.com/ColasNahaboo/mailpixtracker
+# (c) 2025 Colas Nahaboo
+# License: GPL v3
+export VERSION=1.0.1
+
+# parameters of the request
+# url/mailpixtracker            # main menu
+# url/mailpixtracker/new        # create a new tracker id
+# url/mailpixtracker/id/NN      # provide code for id NN, and display access logs
+# url/mailpixtracker/pix/NN     # log an access from email with tracker of id NN
+
+# script is called by https://my.host.org/cgi-bin/mailpixtracker/command/id
+ROOT_URL="$REQUEST_SCHEME://$HTTP_HOST"
+name="${SCRIPT_NAME##*/}"       # the name of the script, can be anything
+url="$ROOT_URL$SCRIPT_NAME"     # its URL
+params="$PATH_INFO"             # arguments of the request
+
+#############################################################################
+# config vars, can be redefined in config file mailpixtracker.conf
+export TZ=                      # timezone used for dates in logs
+export dir=.                    # where to store logs and cached data
+export dateformat='%Y-%m-%d.%Hh%M,%S' # format of dates in logs.
+                                # true ISO:  YYYY-MM-DDTHH:MN:SS
+                                # default more readble: YYYY-MM-DD.HHhMN,SS
+export style=                   # optional HTML code included in header, e.g:
+                                # style='<style>h1 {font-family:arial;}</style>'
+                                # style='<link rel="stylesheet" href="..." />'
+export header=                  # optional header code at start of html body
+export footer=                  # optional footer code at end of html body
+#############################################################################
+
+# load config file if present as a bash script to redefine the above vars
+# shellcheck disable=SC1090 # Ok to not check included file syntax
+[[ -e "$name.conf" ]] && . "$name.conf"
+
+################################# No params: menu
+if [[ -z "$params" ]]; then
+    title="Mail Pixel Tracker"
+    echo "Content-Type:text/html"; echo
+    echo "<!doctype html><head>$style<title>$title</title></head><body>$header"
+    echo "<h1>$title</h1>
+<ul><li><a href='$url/new'>Create a new tracker to insert in emails</a>"
+    if [[ -d "$dir/$name-log" ]]; then
+        echo "<li>Show logs for existing trackers:<ul>"
+        # shellcheck disable=SC2012   # Allow ls instead of find
+        while read -r id; do
+            if [[ -s "$dir/$name-log/$id" ]]; then
+                last=$(tail -1 "$dir/$name-log/$id" | cut -f 1 -d ' ')
+                echo "<li><a href='$url/id/$id'>$id</a>, last log on $last</li>"
+            fi
+        done < <(ls -1 "$dir/$name-log" |sort -nr)
+        echo "</ul>"
+    fi
+    echo "</ul>$footer</body>"
+    exit 0
+fi
+
+################################# new ID, allocate & redirect to log page
+
+if [[ "$params" = /new ]]; then
+    id=0
+    [[ -s "$dir/$name-n" ]] && id=$(cat "$dir/$name-n")
+    ((id++))
+    echo "Location:$url/id/$id"; echo
+    exit 0
+fi
+
+################################# show the log for an ID
+
+if [[ $params =~ /id/([[:digit:]]+)$ ]]; then
+    id="${BASH_REMATCH[1]}"
+    title="Mail Pixel Tracker for ID # $id"
+    echo "Content-Type:text/html"; echo
+    echo "<!doctype html><head>$style<title>$title</title></head><body>$header"
+    echo "$id" >"$dir/$name-n"
+    echo "<h1>$title</h1>
+<p>To insert a tracker in an email, 
+insert the below code in gmail via <a href='https://addons.mozilla.org/en-US/firefox/addon/htmail/'>HTMail</a> (icon: <img height='32px' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAMAAADW3miqAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAWJQAAFiUBSVIk8AAAAf5QTFRFAAAAREdGREdGREdGREdGREdGRklIRUhHREdGRklIU1ZVS05NWVxbS05NRklIVFdWXmFgRklISUxLc3V0XV9eW11dTlFQRUhHTlFQXV9fWFtaUFNSR0pJSUxLS05NRklIV1lZS05NRklITE9OoqOiZ2loTE9ORklIRUhHTE9OV1pZRklITE5OTVBPR0pJSUxLWFpaSEtKSEtKVVhXTU9ORUhHUVRTZWdmTE9OREdGRklIT1JRUFJRRklIRUhHTE9OXmFgdHd2SEtKR0pJd3p5U1VUS05Nd3p5SEtKTE9Ob3FwRUhHTlFQUVRTRklIRklIW15dU1VVSEtKSEtKT1JRSk1MRklIVVhXV1pZSk1MRklITE9OXmFgSUxLRUhHRklIS05Nam1sWFtaR0pJSEtKUFJRSEtKRUhHSEtKUlVUTlFQR0pJTVBPRUhHTU9OTU9PRUhHRkhHS05NaGtqWFtaS05NSUxLSEtKR0lIZmdnTE9OR0pJVFdW0NHRiIqJcHNySk1M6OjoYmVkUFNSRklITE9OUlVUWVxbSUxLR0pJR0pJSEtKhIaFUlVUSUxLRklITE5OTU9OTlBPSEtKRUhHY2VkTE9OSEtKSk1MVVhXVFZVSk1MTE5NUlVUSUxLTVBPZGZlTU9OR0pJYWRjeXp5UFNSSUxLRUhHSEtKTE9O72fMGwAAAKp0Uk5TAGzl/v9r5paSlhSfE33nGgfVlQEHFzP6QwkVKLjFjuAMbd1YAANh7vJiEex7KNWcFLnBG1T4JASB+99BO+r0cQUCp8gCNogBsncB82NE8+sRHrSpJnnoEAp91k0GfO7hVwINy6UwvfyhHT/KRPlSQ/DtaAMKka6a0ghbux8AAQeAAAQ3y2UqD2jHs7EBJIDaVDY9n5QIWcieGRmDejCsYAdgyQYBLIj9r1dZoUPtAAABw0lEQVR4nL2UQUgUYRTH32/XpRBCQQkkEIICMdQ9CF086GGhSwcPQpBdAoliay8LoRC7K4WwKCxBKBEplAfTQ4cIFA9dNFqIDsVGkBQkEkliURTszk7fN7O4MzvjzK13ee//fb/vfY/3zTwEZXK4mWa0TMwMIGwziEQigZkwqlWixP4E5jlimDRJ099A6GhFfKBm+BUKHYMfYVCrasn3Q6F2drU7Dl+lgx1f6AR80b4TPstJle6jBzqtG/9eBd3wTqSH0plyqQGK87aX13qtH4rKndWHNlzQgF56oZeGVLBuZUhs/e5j1QGdW0/w3K4szrNaxecV/9QBDbMxwIreGYElC7nAzxYWXTWN6vuYl8vwwGLGtJ5tbME1Kp/WJAl3tUppZsbbpzTk5SZMaTEBt307fovJzMpI1ha5jO0nIdvwdnc+dE0433EKtlVhbigP6QNx6qpS1kfrhgqkDpAbPHlZixVUSIrH7sH1ulJQW44rbuQ+01tOrSCVOp3er5cyzuwb9yELErk4OPfKChYoznn+sBok8nCv7dJjWF30FliH5BF8W970QZxQgP1vKBo0Umwz1egJhaoQDb8NiRkh49A0/wFMNn+lFDGoAQAAAABJRU5ErkJggg=='>)
+to track with ID # <large><b>$id</b></large>:
+<p>
+<code>&lt;img src='$url/pix/$id' width='1' height='1'&gt;</code>
+<p>
+(or go back to the <a href='$url'>main MailPixelTracker menu</a>)<p>"
+    if [[ -s "$dir/$name-log/$id" ]]; then
+	echo "<b>Access logs for ID # $id</b><br><table>"
+	while read -r line; do
+            if [[ $color == eee ]]; then color=fff
+            else color=eee
+            fi
+            if [[ $line =~ ^(.+)\ (\[[.[:digit:]]+\]\ [(][^\)]*[)])( - .*) ]]; then
+                echo "<tr><td style='background-color:#$color'><b>${BASH_REMATCH[1]}</b> ${BASH_REMATCH[2]}<small style='color:#888'>${BASH_REMATCH[3]}</small>"                                                  
+            else
+                echo "<tr><td style='background-color:#$color'><b>${line%% *}</b> ${line#* }"
+            fi
+        done < <(tac "$dir/$name-log/$id")
+        echo "</table>"
+    else
+	echo "No access logs yet for ID # $id"; echo
+    fi
+    echo "$footer</body>"
+    exit 0
+fi
+
+mkdir -p "$dir/$name-log"
+
+################################# provide a 1x1 pixel, and log the ID access
+
+if [[ $params =~ /pix/([[:digit:]]+)$ ]]; then
+    id="${BASH_REMATCH[1]}"
+    date=$(date +"$dateformat")
+    clienthost=$(host "$REMOTE_ADDR")
+    clientname=
+    [[ $clienthost =~ 'domain name pointer '(.+)[.]$ ]] && clientname="${BASH_REMATCH[1]}"
+    echo "$date [$REMOTE_ADDR] ($clientname) - $HTTP_USER_AGENT" >>"$dir/$name-log/$id"
+    echo 'Content-Type:image/png'; echo
+    [[ -e "$dir/$name-1px.png" ]] || # cache 1x1 transparent pixel PNG if needed
+	base64 -d <<<'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==' >"$dir/$name-1px.png"
+    cat "$dir/$name-1px.png"
+    exit 0
+fi
+
+################################# unknown use ==> main menu
+
+echo "Location:$url"; echo
+exit 0

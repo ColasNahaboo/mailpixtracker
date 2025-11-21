@@ -3,7 +3,7 @@
 # https://github.com/ColasNahaboo/mailpixtracker
 # (c) 2025 Colas Nahaboo
 # License: GPL v3
-export VERSION=1.0.2
+export VERSION=1.0.3
 
 # parameters of the request
 # url/mailpixtracker            # main menu
@@ -17,7 +17,10 @@ name="${SCRIPT_NAME##*/}"       # the name of the script, can be anything
 url="$ROOT_URL$SCRIPT_NAME"     # its URL
 params="$PATH_INFO"             # arguments of the request
 
-config="$name.conf"             # EDIT BY HAND to have the config file elsewhere
+# you can redefine the location of the config file via this env variable
+if [[ -n "$MAILPIXELTRACKER_CONF" ]]; then config="$MAILPIXELTRACKER_CONF"
+else config="$name.conf"
+fi
 #############################################################################
 # config vars, can be redefined in config file mailpixtracker.conf
 export TZ=                      # timezone used for dates in logs
@@ -28,8 +31,10 @@ export dateformat='%Y-%m-%d.%Hh%M,%S' # format of dates in logs.
 export style=                   # optional HTML code included in header, e.g:
                                 # style='<style>h1 {font-family:arial;}</style>'
                                 # style='<link rel="stylesheet" href="..." />'
-export header=                  # optional header code at start of html body
-export footer=                  # optional footer code at end of html body
+# optional header code at start of html body
+export header=
+# optional footer code at end of html body
+export footer="<hr><a href='https://github.com/ColasNahaboo/mailpixtracker'>mailpixeltracker</a> v$VERSION"
 #############################################################################
 
 # load config file if present as a bash script to redefine the above vars
@@ -80,15 +85,15 @@ if [[ $params =~ /id/([[:digit:]]+)$ ]]; then
     echo "<!doctype html><head>$style<title>$title</title></head><body>$header"
     echo "$id" >"$dir/$name-n"
     echo "<h1>$title</h1>
-<p>To insert a tracker in an email, 
-insert the below code in gmail via <a href='https://addons.mozilla.org/en-US/firefox/addon/htmail/'>HTMail</a> (icon: <img height='32px' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAMAAADW3miqAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAWJQAAFiUBSVIk8AAAAf5QTFRFAAAAREdGREdGREdGREdGREdGRklIRUhHREdGRklIU1ZVS05NWVxbS05NRklIVFdWXmFgRklISUxLc3V0XV9eW11dTlFQRUhHTlFQXV9fWFtaUFNSR0pJSUxLS05NRklIV1lZS05NRklITE9OoqOiZ2loTE9ORklIRUhHTE9OV1pZRklITE5OTVBPR0pJSUxLWFpaSEtKSEtKVVhXTU9ORUhHUVRTZWdmTE9OREdGRklIT1JRUFJRRklIRUhHTE9OXmFgdHd2SEtKR0pJd3p5U1VUS05Nd3p5SEtKTE9Ob3FwRUhHTlFQUVRTRklIRklIW15dU1VVSEtKSEtKT1JRSk1MRklIVVhXV1pZSk1MRklITE9OXmFgSUxLRUhHRklIS05Nam1sWFtaR0pJSEtKUFJRSEtKRUhHSEtKUlVUTlFQR0pJTVBPRUhHTU9OTU9PRUhHRkhHS05NaGtqWFtaS05NSUxLSEtKR0lIZmdnTE9OR0pJVFdW0NHRiIqJcHNySk1M6OjoYmVkUFNSRklITE9OUlVUWVxbSUxLR0pJR0pJSEtKhIaFUlVUSUxLRklITE5OTU9OTlBPSEtKRUhHY2VkTE9OSEtKSk1MVVhXVFZVSk1MTE5NUlVUSUxLTVBPZGZlTU9OR0pJYWRjeXp5UFNSSUxLRUhHSEtKTE9O72fMGwAAAKp0Uk5TAGzl/v9r5paSlhSfE33nGgfVlQEHFzP6QwkVKLjFjuAMbd1YAANh7vJiEex7KNWcFLnBG1T4JASB+99BO+r0cQUCp8gCNogBsncB82NE8+sRHrSpJnnoEAp91k0GfO7hVwINy6UwvfyhHT/KRPlSQ/DtaAMKka6a0ghbux8AAQeAAAQ3y2UqD2jHs7EBJIDaVDY9n5QIWcieGRmDejCsYAdgyQYBLIj9r1dZoUPtAAABw0lEQVR4nL2UQUgUYRTH32/XpRBCQQkkEIICMdQ9CF086GGhSwcPQpBdAoliay8LoRC7K4WwKCxBKBEplAfTQ4cIFA9dNFqIDsVGkBQkEkliURTszk7fN7O4MzvjzK13ee//fb/vfY/3zTwEZXK4mWa0TMwMIGwziEQigZkwqlWixP4E5jlimDRJ099A6GhFfKBm+BUKHYMfYVCrasn3Q6F2drU7Dl+lgx1f6AR80b4TPstJle6jBzqtG/9eBd3wTqSH0plyqQGK87aX13qtH4rKndWHNlzQgF56oZeGVLBuZUhs/e5j1QGdW0/w3K4szrNaxecV/9QBDbMxwIreGYElC7nAzxYWXTWN6vuYl8vwwGLGtJ5tbME1Kp/WJAl3tUppZsbbpzTk5SZMaTEBt307fovJzMpI1ha5jO0nIdvwdnc+dE0433EKtlVhbigP6QNx6qpS1kfrhgqkDpAbPHlZixVUSIrH7sH1ulJQW44rbuQ+01tOrSCVOp3er5cyzuwb9yELErk4OPfKChYoznn+sBok8nCv7dJjWF30FliH5BF8W970QZxQgP1vKBo0Umwz1egJhaoQDb8NiRkh49A0/wFMNn+lFDGoAQAAAABJRU5ErkJggg=='>)
-to track with ID # <large><b>$id</b></large>:
+<p>To insert a tracker od ID # $id in an email, 
+insert the below code in gmail via <a href='https://addons.mozilla.org/en-US/firefox/addon/htmail/'>HTMail</a><br />(icon: <img height='22px' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAMAAADW3miqAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAWJQAAFiUBSVIk8AAAAf5QTFRFAAAAREdGREdGREdGREdGREdGRklIRUhHREdGRklIU1ZVS05NWVxbS05NRklIVFdWXmFgRklISUxLc3V0XV9eW11dTlFQRUhHTlFQXV9fWFtaUFNSR0pJSUxLS05NRklIV1lZS05NRklITE9OoqOiZ2loTE9ORklIRUhHTE9OV1pZRklITE5OTVBPR0pJSUxLWFpaSEtKSEtKVVhXTU9ORUhHUVRTZWdmTE9OREdGRklIT1JRUFJRRklIRUhHTE9OXmFgdHd2SEtKR0pJd3p5U1VUS05Nd3p5SEtKTE9Ob3FwRUhHTlFQUVRTRklIRklIW15dU1VVSEtKSEtKT1JRSk1MRklIVVhXV1pZSk1MRklITE9OXmFgSUxLRUhHRklIS05Nam1sWFtaR0pJSEtKUFJRSEtKRUhHSEtKUlVUTlFQR0pJTVBPRUhHTU9OTU9PRUhHRkhHS05NaGtqWFtaS05NSUxLSEtKR0lIZmdnTE9OR0pJVFdW0NHRiIqJcHNySk1M6OjoYmVkUFNSRklITE9OUlVUWVxbSUxLR0pJR0pJSEtKhIaFUlVUSUxLRklITE5OTU9OTlBPSEtKRUhHY2VkTE9OSEtKSk1MVVhXVFZVSk1MTE5NUlVUSUxLTVBPZGZlTU9OR0pJYWRjeXp5UFNSSUxLRUhHSEtKTE9O72fMGwAAAKp0Uk5TAGzl/v9r5paSlhSfE33nGgfVlQEHFzP6QwkVKLjFjuAMbd1YAANh7vJiEex7KNWcFLnBG1T4JASB+99BO+r0cQUCp8gCNogBsncB82NE8+sRHrSpJnnoEAp91k0GfO7hVwINy6UwvfyhHT/KRPlSQ/DtaAMKka6a0ghbux8AAQeAAAQ3y2UqD2jHs7EBJIDaVDY9n5QIWcieGRmDejCsYAdgyQYBLIj9r1dZoUPtAAABw0lEQVR4nL2UQUgUYRTH32/XpRBCQQkkEIICMdQ9CF086GGhSwcPQpBdAoliay8LoRC7K4WwKCxBKBEplAfTQ4cIFA9dNFqIDsVGkBQkEkliURTszk7fN7O4MzvjzK13ee//fb/vfY/3zTwEZXK4mWa0TMwMIGwziEQigZkwqlWixP4E5jlimDRJ099A6GhFfKBm+BUKHYMfYVCrasn3Q6F2drU7Dl+lgx1f6AR80b4TPstJle6jBzqtG/9eBd3wTqSH0plyqQGK87aX13qtH4rKndWHNlzQgF56oZeGVLBuZUhs/e5j1QGdW0/w3K4szrNaxecV/9QBDbMxwIreGYElC7nAzxYWXTWN6vuYl8vwwGLGtJ5tbME1Kp/WJAl3tUppZsbbpzTk5SZMaTEBt307fovJzMpI1ha5jO0nIdvwdnc+dE0433EKtlVhbigP6QNx6qpS1kfrhgqkDpAbPHlZixVUSIrH7sH1ulJQW44rbuQ+01tOrSCVOp3er5cyzuwb9yELErk4OPfKChYoznn+sBok8nCv7dJjWF30FliH5BF8W970QZxQgP1vKBo0Umwz1egJhaoQDb8NiRkh49A0/wFMNn+lFDGoAQAAAABJRU5ErkJggg=='> at the bottom right of the compose window)
+
 <p>
-<code>&lt;img src='$url/pix/$id' width='1' height='1'&gt;</code>
+<large style='background-color:#ffffaa'><code class=mptcode>&lt;img src='$url/pix/$id' width='1' height='1'&gt;</code></large>
 <p>
 (or go back to the <a href='$url'>main MailPixelTracker menu</a>)<p>"
     if [[ -s "$dir/$name-log/$id" ]]; then
-	echo "<b>Access logs for ID # $id</b><br><table>"
+	echo "<h2>Access logs for ID # $id</h2><br><table class=mptlog>"
 	while read -r line; do
             if [[ $color == eee ]]; then color=fff
             else color=eee

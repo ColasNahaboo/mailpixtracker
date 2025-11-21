@@ -3,7 +3,7 @@
 # https://github.com/ColasNahaboo/mailpixtracker
 # (c) 2025 Colas Nahaboo
 # License: GPL v3
-export VERSION=1.0.3
+export VERSION=1.0.4
 
 # parameters of the request
 # url/mailpixtracker            # main menu
@@ -86,22 +86,61 @@ if [[ $params =~ /id/([[:digit:]]+)$ ]]; then
     echo "$id" >"$dir/$name-n"
     echo "<h1>$title</h1>
 <p>To insert a tracker od ID # $id in an email, 
-insert the below code in gmail via <a href='https://addons.mozilla.org/en-US/firefox/addon/htmail/'>HTMail</a><br />(icon: <img height='22px' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAMAAADW3miqAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAWJQAAFiUBSVIk8AAAAf5QTFRFAAAAREdGREdGREdGREdGREdGRklIRUhHREdGRklIU1ZVS05NWVxbS05NRklIVFdWXmFgRklISUxLc3V0XV9eW11dTlFQRUhHTlFQXV9fWFtaUFNSR0pJSUxLS05NRklIV1lZS05NRklITE9OoqOiZ2loTE9ORklIRUhHTE9OV1pZRklITE5OTVBPR0pJSUxLWFpaSEtKSEtKVVhXTU9ORUhHUVRTZWdmTE9OREdGRklIT1JRUFJRRklIRUhHTE9OXmFgdHd2SEtKR0pJd3p5U1VUS05Nd3p5SEtKTE9Ob3FwRUhHTlFQUVRTRklIRklIW15dU1VVSEtKSEtKT1JRSk1MRklIVVhXV1pZSk1MRklITE9OXmFgSUxLRUhHRklIS05Nam1sWFtaR0pJSEtKUFJRSEtKRUhHSEtKUlVUTlFQR0pJTVBPRUhHTU9OTU9PRUhHRkhHS05NaGtqWFtaS05NSUxLSEtKR0lIZmdnTE9OR0pJVFdW0NHRiIqJcHNySk1M6OjoYmVkUFNSRklITE9OUlVUWVxbSUxLR0pJR0pJSEtKhIaFUlVUSUxLRklITE5OTU9OTlBPSEtKRUhHY2VkTE9OSEtKSk1MVVhXVFZVSk1MTE5NUlVUSUxLTVBPZGZlTU9OR0pJYWRjeXp5UFNSSUxLRUhHSEtKTE9O72fMGwAAAKp0Uk5TAGzl/v9r5paSlhSfE33nGgfVlQEHFzP6QwkVKLjFjuAMbd1YAANh7vJiEex7KNWcFLnBG1T4JASB+99BO+r0cQUCp8gCNogBsncB82NE8+sRHrSpJnnoEAp91k0GfO7hVwINy6UwvfyhHT/KRPlSQ/DtaAMKka6a0ghbux8AAQeAAAQ3y2UqD2jHs7EBJIDaVDY9n5QIWcieGRmDejCsYAdgyQYBLIj9r1dZoUPtAAABw0lEQVR4nL2UQUgUYRTH32/XpRBCQQkkEIICMdQ9CF086GGhSwcPQpBdAoliay8LoRC7K4WwKCxBKBEplAfTQ4cIFA9dNFqIDsVGkBQkEkliURTszk7fN7O4MzvjzK13ee//fb/vfY/3zTwEZXK4mWa0TMwMIGwziEQigZkwqlWixP4E5jlimDRJ099A6GhFfKBm+BUKHYMfYVCrasn3Q6F2drU7Dl+lgx1f6AR80b4TPstJle6jBzqtG/9eBd3wTqSH0plyqQGK87aX13qtH4rKndWHNlzQgF56oZeGVLBuZUhs/e5j1QGdW0/w3K4szrNaxecV/9QBDbMxwIreGYElC7nAzxYWXTWN6vuYl8vwwGLGtJ5tbME1Kp/WJAl3tUppZsbbpzTk5SZMaTEBt307fovJzMpI1ha5jO0nIdvwdnc+dE0433EKtlVhbigP6QNx6qpS1kfrhgqkDpAbPHlZixVUSIrH7sH1ulJQW44rbuQ+01tOrSCVOp3er5cyzuwb9yELErk4OPfKChYoznn+sBok8nCv7dJjWF30FliH5BF8W970QZxQgP1vKBo0Umwz1egJhaoQDb8NiRkh49A0/wFMNn+lFDGoAQAAAABJRU5ErkJggg=='> at the bottom right of the compose window)
-
+insert the below code in gmail via <a href='https://addons.mozilla.org/en-US/firefox/addon/htmail/'>HTMail</a><br />(icon: <img height='22px' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAMAAADW3miqAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAWJQAAFiUBSVIk8AAAAf5QTFRFAAAAREdGREdGREdGREdGREdGRklIRUhHREdGRklIU1ZVS05NWVxbS05NRklIVFdWXmFgRklISUxLc3V0XV9eW11dTlFQRUhHTlFQXV9fWFtaUFNSR0pJSUxLS05NRklIV1lZS05NRklITE9OoqOiZ2loTE9ORklIRUhHTE9OV1pZRklITE5OTVBPR0pJSUxLWFpaSEtKSEtKVVhXTU9ORUhHUVRTZWdmTE9OREdGRklIT1JRUFJRRklIRUhHTE9OXmFgdHd2SEtKR0pJd3p5U1VUS05Nd3p5SEtKTE9Ob3FwRUhHTlFQUVRTRklIRklIW15dU1VVSEtKSEtKT1JRSk1MRklIVVhXV1pZSk1MRklITE9OXmFgSUxLRUhHRklIS05Nam1sWFtaR0pJSEtKUFJRSEtKRUhHSEtKUlVUTlFQR0pJTVBPRUhHTU9OTU9PRUhHRkhHS05NaGtqWFtaS05NSUxLSEtKR0lIZmdnTE9OR0pJVFdW0NHRiIqJcHNySk1M6OjoYmVkUFNSRklITE9OUlVUWVxbSUxLR0pJR0pJSEtKhIaFUlVUSUxLRklITE5OTU9OTlBPSEtKRUhHY2VkTE9OSEtKSk1MVVhXVFZVSk1MTE5NUlVUSUxLTVBPZGZlTU9OR0pJYWRjeXp5UFNSSUxLRUhHSEtKTE9O72fMGwAAAKp0Uk5TAGzl/v9r5paSlhSfE33nGgfVlQEHFzP6QwkVKLjFjuAMbd1YAANh7vJiEex7KNWcFLnBG1T4JASB+99BO+r0cQUCp8gCNogBsncB82NE8+sRHrSpJnnoEAp91k0GfO7hVwINy6UwvfyhHT/KRPlSQ/DtaAMKka6a0ghbux8AAQeAAAQ3y2UqD2jHs7EBJIDaVDY9n5QIWcieGRmDejCsYAdgyQYBLIj9r1dZoUPtAAABw0lEQVR4nL2UQUgUYRTH32/XpRBCQQkkEIICMdQ9CF086GGhSwcPQpBdAoliay8LoRC7K4WwKCxBKBEplAfTQ4cIFA9dNFqIDsVGkBQkEkliURTszk7fN7O4MzvjzK13ee//fb/vfY/3zTwEZXK4mWa0TMwMIGwziEQigZkwqlWixP4E5jlimDRJ099A6GhFfKBm+BUKHYMfYVCrasn3Q6F2drU7Dl+lgx1f6AR80b4TPstJle6jBzqtG/9eBd3wTqSH0plyqQGK87aX13qtH4rKndWHNlzQgF56oZeGVLBuZUhs/e5j1QGdW0/w3K4szrNaxecV/9QBDbMxwIreGYElC7nAzxYWXTWN6vuYl8vwwGLGtJ5tbME1Kp/WJAl3tUppZsbbpzTk5SZMaTEBt307fovJzMpI1ha5jO0nIdvwdnc+dE0433EKtlVhbigP6QNx6qpS1kfrhgqkDpAbPHlZixVUSIrH7sH1ulJQW44rbuQ+01tOrSCVOp3er5cyzuwb9yELErk4OPfKChYoznn+sBok8nCv7dJjWF30FliH5BF8W970QZxQgP1vKBo0Umwz1egJhaoQDb8NiRkh49A0/wFMNn+lFDGoAQAAAABJRU5ErkJggg=='> at the bottom right of the mail compose window)
 <p>
-<large style='background-color:#ffffaa'><code class=mptcode>&lt;img src='$url/pix/$id' width='1' height='1'&gt;</code></large>
+<large style='background-color:#ffffdd'><code class=mptcode>&lt;img src='$url/pix/$id' width='1' height='1'&gt;</code></large>
 <p>
 (or go back to the <a href='$url'>main MailPixelTracker menu</a>)<p>"
     if [[ -s "$dir/$name-log/$id" ]]; then
 	echo "<h2>Access logs for ID # $id</h2><br><table class=mptlog>"
-	while read -r line; do
-            if [[ $color == eee ]]; then color=fff
-            else color=eee
+        # To maximize perceptual spacing, I used golden-angle hue sampling
+        # (137.508° steps), a well-known approximation of greedy max-min spacing
+        # to allow distinct colors to distinct IPs
+        colors[0]='#f7f7f7'
+        colors[1]='hsl( 92.5, 60%, 95%)'
+        colors[2]='hsl(315.0, 60%, 95%)'
+        colors[3]='hsl(177.5, 60%, 95%)'
+        colors[4]='hsl( 40.0, 60%, 95%)'
+        colors[5]='hsl(262.5, 60%, 95%)'
+        colors[6]='hsl(125.0, 60%, 95%)'
+        colors[7]='hsl(347.5, 60%, 95%)'
+        colors[8]='hsl(210.0, 60%, 95%)'
+        colors[9]='hsl( 72.5, 60%, 95%)'
+        colors[10]='hsl(295.0, 60%, 95%)'
+        colors[11]='hsl(157.5, 60%, 95%)'
+        colors[12]='hsl( 20.0, 60%, 95%)'
+        colors[13]='hsl(242.5, 60%, 95%)'
+        colors[14]='hsl(105.0, 60%, 95%)'
+        colors[15]='hsl(327.5, 60%, 95%)'
+        colors[16]='hsl(190.0, 60%, 95%)'
+        colors[17]='hsl( 52.5, 60%, 95%)'
+        colors[18]='hsl(275.0, 60%, 95%)'
+        colors[19]='hsl(137.5, 60%, 95%)'
+        colors[20]='hsl(  0, 60%, 95%)'
+        color_unknown='#eee'
+        # we parse the list of all mentioned ips, to use as indexes in colors[]
+        ipx=0
+        declare -A ips
+        while read -r line; do
+            if [[ $line =~ \[([.[:digit:]]+)\] ]]; then
+                ip=_"${BASH_REMATCH[1]//./_}"
+                if [[ -z "${ips[$ip]}" ]]; then
+                    echo "<*#[ips[$ip] = $ipx]#*>" >&2
+                    # shellcheck disable=SC2004 # ip is not a numeric index
+                    ips[$ip]="$ipx"
+                    ((ipx++))
+                fi
             fi
-            if [[ $line =~ ^(.+)\ (\[[.[:digit:]]+\]\ [(][^\)]*[)])( - .*) ]]; then
-                echo "<tr><td style='background-color:#$color'><b>${BASH_REMATCH[1]}</b> ${BASH_REMATCH[2]}<small style='color:#888'>${BASH_REMATCH[3]}</small>"                                                  
+        done <"$dir/$name-log/$id"
+        
+	while read -r line; do
+            if [[ $line =~ ^(.+)\ (\[([.[:digit:]]+)\]\ [(][^\)]*[)])( - .*) ]]; then
+                ip=_"${BASH_REMATCH[3]//./_}"
+                ipx="${ips[$ip]}"
+                color="${colors[$ipx]}"
+                echo "<tr><td style='background-color:$color'><b>${BASH_REMATCH[1]}</b> ${BASH_REMATCH[2]}<small style='color:#888'>${BASH_REMATCH[4]}</small>"                                                  
             else
-                echo "<tr><td style='background-color:#$color'><b>${line%% *}</b> ${line#* }"
+                echo "<tr><td style='background-color:$color_unknown'><b>${line%% *}</b> ${line#* }"
             fi
         done < <(tac "$dir/$name-log/$id")
         echo "</table>"

@@ -56,6 +56,7 @@ Files auto-created in `dir` (default is the same cgi-bin directory where mailpix
 
 ## History
 
+- v1.0.4 2025-11-21 log lines have one color per distinct IP. First one is always grey.
 - v1.0.3 2025-11-21 $MAILPIXELTRACKER_CONF env var to define config file location. Default footer identifying the script.
 - v1.0.2 2025-11-16 autocreate `$dir` if needed.
 - v1.0.0 2025-11-16 Initial released version.

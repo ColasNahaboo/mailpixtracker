@@ -72,7 +72,7 @@ And to remove their access: `rm /my-server-cgi-directory/ciefahnaiteiQu6a*`
 
 ## License: GPL V3 (c) 2025 Colas Nahaboo
 
-[Source repository](https://github.com/ColasNahaboo/mailpixtracker)
+[GitHub Source repository](https://github.com/ColasNahaboo/mailpixtracker)
 
 ## Technical details
 

@@ -16,6 +16,7 @@ Note that the tracking is not foolproof. Most mailers nowadays prompt the user b
 - Note that the log will begin to fill up while composing your mail once the tracker is installed. The first lines in the log - yours - are always highlighted in grey, to differentiate them from recipients.
 - Once the email is sent, each time people will read it, and have allowed their mailers to display images, the mailtracker log page will add an entry.
 - Log entries are colored with a different color for each client IP address, for ease of reading.
+- New log entries added since last time the log was viewed have a yellow rectangle at their left side.
 - The Notes field is a convenient way to store details about the sent email for this tracker ID, as well as remembering which timestamps correspond to specific events. Use it!
 
 ## Example
@@ -43,7 +44,7 @@ If you do not want a non-cgi script in this dir, you can set the name of the con
 This script will be interpreted as a bash script, so you can redefine global variables:
 - `TZ` timezone used for dates in logs. Default: the server timezone.
 - `dir` where to store logs and cached data. Default is ".", th directory where the script is run.
-- `dateformat` the format of the linux command "date" to format the timestamp. The default is '%Y-%m-%d.%Hh%M,%S', which gives times like 2025-11-18.13h41,38 for a better readability, but you can use the true ISO format by setting `dateformat='%Y-%m-%dT%H:%M:%S'`
+- `dateformat` the format of the linux command "date" to format the timestamp. The default is '%Y-%m-%d.%Hh%M,%S', which gives times like 2025-11-18.13h41,38 for a better readability, but you can use the true ISO format by setting `dateformat='%Y-%m-%dT%H:%M:%S'`<br>Warning: formats must ensure their alphabetical order obey the chronological order: YYYY-MM-DD is OK, but not MM/DD/YYYY.
 - `style` optional HTML code included in header. Default is a minimal style. You can embed CSS code or link an external stylesheet, e.g:
   - `style='<style>h1 {font-family:arial;}</style>'`
   - `style='<link rel="stylesheet" href="..." />'`
@@ -88,6 +89,7 @@ If you want to remove the logs for a tracker `NN`, just remove `mailpixtracker-l
 
 ## History
 
+- v2.2.0 2025-11-25 new log entries signalled.
 - v2.1.1 2025-11-25 UI display now "#NN" instead of "for NN"
 - v2.1.0 2025-11-25 smaller htmail icon, can edit name and note metadata
 - v2.0.0 2025-11-24

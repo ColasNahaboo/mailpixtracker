@@ -3,7 +3,7 @@
 # https://github.com/ColasNahaboo/mailpixtracker
 # (c) 2025 Colas Nahaboo
 # License: GPL v3
-export VERSION=2.1.1
+export VERSION=2.2.0
 
 # parameters of the request
 # url/mailpixtracker            # main menu
@@ -40,6 +40,7 @@ export footer="<hr><a href='https://github.com/ColasNahaboo/mailpixtracker'>mail
 # built-in styling is regrouped here, keeping it is recommended.
 export mptstyle="table.mptlog td {padding: 0.1rem 0.4rem}
 table.mptlog td.useragent {font-size:small; color:#888888}
+table.mptlog td.new {background-color:yellow}
 code.mptcode {font-size: large; background-color:#ffffdd}
 input,textarea {padding: 0.2rem 0.2rem}
 h1 {font-size:1.6rem}
@@ -120,6 +121,7 @@ if [[ "$params" = /new ]]; then
     ((id++))
     mkdir -p "$dir"
     true >"$dir/$name-log/$id"
+    true >"$dir/$name-log/$id.meta"
     if [[ -n "$FORM_name" ]]; then
         qname=$(html_escape "$FORM_name")
         echo "name $qname" >>"$dir/$name-log/$id.meta"
@@ -180,7 +182,7 @@ if [[ $params =~ /id/([[:digit:]]+)$ ]]; then
         <h2>Access logs</h2>"
     if [[ -s "$dir/$name-log/$id" ]]; then
         echo "<table class=mptlog>
-        <tr><th>Date+Time<th>IP address<th>Hostname<th>User Agent"
+        <tr><th><th>Date+Time<th>IP address<th>Hostname<th>User Agent"
         # To maximize perceptual spacing, I used golden-angle hue sampling
         # (137.508° steps), a well-known approximation of greedy max-min spacing
         # to allow distinct colors to distinct IPs
@@ -223,7 +225,7 @@ if [[ $params =~ /id/([[:digit:]]+)$ ]]; then
                 ((ipx++))
             fi
         done <"$dir/$name-log/$id"
-        
+        lastseen=$(date -r "$dir/$name-log/$id.meta" +"$dateformat" 2>/dev/null)
 	while read -r line; do
             date=
             # v2 format line
@@ -243,9 +245,10 @@ if [[ $params =~ /id/([[:digit:]]+)$ ]]; then
                 ipk="_${ip//./_}"
                 ipx="${ips[$ipk]}"
                 color="${colors[$ipx]}"
-                echo "<tr style='background-color:$color'><td><b>$date</b><td>$ip<td><i>$host</i><td class=useragent>$agent</small></tr>"
+                isnew=old; [[ "$date" > "$lastseen" ]] && isnew=new
+                echo "<tr style='background-color:$color'><td class=$isnew><td><b>$date</b><td>$ip<td><i>$host</i><td class=useragent>$agent</small></tr>"
             else                # unknown format
-                echo "<tr style='background-color:$color_unknown'><td colspan=4>${line}"
+                echo "<tr style='background-color:$color_unknown'><td><td colspan=4>${line}"
             fi
         done < <(tac "$dir/$name-log/$id")
         echo "</table>"
@@ -253,6 +256,7 @@ if [[ $params =~ /id/([[:digit:]]+)$ ]]; then
 	echo "No access logs yet"
     fi
     echo "$footer</body>"
+    touch "$dir/$name-log/$id.meta"
     exit 0
 fi
 

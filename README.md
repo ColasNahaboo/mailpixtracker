@@ -67,6 +67,7 @@ Files auto-created in `dir` (default is the same cgi-bin directory where mailpix
 
 ## History
 
+- v2.1.1 2025-11-25 UI display now "#NN" instead of "for NN"
 - v2.1.0 2025-11-25 smaller htmail icon, can edit name and note metadata
 - v2.0.0 2025-11-24
   - log lines format change: tab-separated values

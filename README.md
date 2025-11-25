@@ -18,6 +18,12 @@ Note that the tracking is not foolproof. Most mailers nowadays prompt the user b
 - Log entries are colored with a different color for each client IP address, for ease of reading.
 - The Notes field is a convenient way to store details about the sent email for this tracker ID, as well as remembering which timestamps correspond to specific events. Use it!
 
+## Example
+
+The log page for the tracker of ID #17 and its access logs:
+
+![](screenshot1.png)
+
 ## Installation
 
 - Just copy the bash script `mailpixtracker` into any cgi-enabled directory on your web server, and also the [cgibashopts](https://github.com/ColasNahaboo/cgibashopts) script
@@ -56,12 +62,6 @@ style='<style>html {font-family: verdana,arial,geneva,helvetica,sans-serif;}</st
 Note that by default, mailpixtracker will create some files and a directory (all starting by the same name as the script itself) in the installation directory. You can change this via the `dir` config variable.
 
 If you want to implement access control to the script in your server, be aware that access to the `pix/NN` sub-urlshould always be enabled for all, e.g. access to `https://my.server.org/cgi-bin/mailpixtracker` may be restricted, but all accesses to `https://my.server.org/cgi-bin/mailpixtracker/pix/NN` should be allowed.
-
-## Example
-
-The page for the tracker of ID #17 and its access logs:
-
-![](screenshot1.png)
 
 ## License: GPL V3 (c) 2025 Colas Nahaboo
 

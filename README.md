@@ -9,7 +9,7 @@ This is a simple bash script to track emails via an invisible pixel, for my pers
 Note that the tracking is not foolproof. Most mailers nowadays prompt the user before loading images.
 
 ## Usage
-- Go to the script URL on your web server.
+- Go to the script URL on your web server. E.g: `https://my.server.org/cgi-bin/mailpixtracker`
 - Create a new tracker. You will need one separate tracker (with a unique ID number) for each email, to track each email in a separate log. You can optionally add a meaningful name.
 - Mailpixtracker will then show you the log page for the tracker. You can edit its name and various notes at any time.
 - When composing your email, copy/paste into it the yellow highlighted HTML line at the top of the log page, via your installed browser extension or email software.
@@ -27,7 +27,7 @@ The log page for the tracker of ID #17 and its access logs:
 ## Installation
 
 - Just copy the bash script `mailpixtracker` into any cgi-enabled directory on your web server, and also the [cgibashopts](https://github.com/ColasNahaboo/cgibashopts) script
-- You can rename mailpixtracker as you want, let's say "my-mpt". Since there are no access control, choosing a hard to guess name will act as a protection, or you can protect the access via directives of your web server. E.g. `https://my.server.org/cgi-bin/a-name-hard-to-guess`
+- You can rename the "mailpixtracker" file as you want, e.g to "a-name-hard-to-guess". Since there are no access control, choosing a hard to guess name will act as a protection, or you can protect the access via directives of your web server. E.g. `https://my.server.org/cgi-bin/a-name-hard-to-guess`
 - If using a webmail, I recommend installing a browser extension to allow easy inclusion of the generated tracker HTML code in your emails. For GMail, you can use the HTMail extension for [Firefox](https://addons.mozilla.org/en-US/firefox/addon/htmail/) or [Chrome](https://chromewebstore.google.com/detail/htmail-insert-html-into-g/omojcahabhafmagldeheegggbakefhlh?hl=en).
 - Requirements: 
   - any web server able to execute [CGI](https://en.wikipedia.org/wiki/Common_Gateway_Interface) scripts
@@ -62,6 +62,11 @@ style='<style>html {font-family: verdana,arial,geneva,helvetica,sans-serif;}</st
 Note that by default, mailpixtracker will create some files and a directory (all starting by the same name as the script itself) in the installation directory. You can change this via the `dir` config variable.
 
 If you want to implement access control to the script in your server, be aware that access to the `pix/NN` sub-urlshould always be enabled for all, e.g. access to `https://my.server.org/cgi-bin/mailpixtracker` may be restricted, but all accesses to `https://my.server.org/cgi-bin/mailpixtracker/pix/NN` should be allowed.
+
+If you want to allow other users to use your mailpixtracker installation, I recommend generating a unique name for the script for them to use by creating a symbolic link to your mailpixtracker file, so you can remove their access simply by removing the symbolic link and associated files. `pwgen` is a handy utility to generate unique names.
+E.g: `cd /my-server-cgi-directory; ln -s a-name-hard-to-guess ciefahnaiteiQu6a`
+Thus you can tell them to use `https://my.server.org/cgi-bin/ciefahnaiteiQu6a`
+And to remove their access: `rm /my-server-cgi-directory/ciefahnaiteiQu6a*`
 
 ## License: GPL V3 (c) 2025 Colas Nahaboo
 

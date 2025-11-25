@@ -48,7 +48,7 @@ This script will be interpreted as a bash script, so you can redefine global var
   - `style='<style>h1 {font-family:arial;}</style>'`
   - `style='<link rel="stylesheet" href="..." />'`
 - `header` optional HTML header code included at the start of the html body. Default is empty.
-- `footer` optional HTML footer code included at the end of the html body. Default is `<hr><a href='https://github.com/ColasNahaboo/mailpixtracker'>`
+- `footer` optional HTML footer code included at the end of the html body.<br>Default is `<hr><a href='https://github.com/ColasNahaboo/mailpixtracker'>`
 
 Example:
 
@@ -61,11 +61,12 @@ style='<style>html {font-family: verdana,arial,geneva,helvetica,sans-serif;}</st
 
 Note that by default, mailpixtracker will create some files and a directory (all starting by the same name as the script itself) in the installation directory. You can change this via the `dir` config variable.
 
-If you want to implement access control to the script in your server, be aware that access to the `pix/NN` sub-urlshould always be enabled for all, e.g. access to `https://my.server.org/cgi-bin/mailpixtracker` may be restricted, but all accesses to `https://my.server.org/cgi-bin/mailpixtracker/pix/NN` should be allowed.
+If you want to implement access control to the script in your server, be aware that access to the `pix/NN` sub-urlshould always be enabled for all.<br>
+E.g. access to `https://my.server.org/cgi-bin/mailpixtracker` may be restricted, but all accesses to `https://my.server.org/cgi-bin/mailpixtracker/pix/NN` should be allowed.
 
-If you want to allow other users to use your mailpixtracker installation, I recommend generating a unique name for the script for them to use by creating a symbolic link to your mailpixtracker file, so you can remove their access simply by removing the symbolic link and associated files. `pwgen` is a handy utility to generate unique names.
-E.g: `cd /my-server-cgi-directory; ln -s a-name-hard-to-guess ciefahnaiteiQu6a`
-Thus you can tell them to use `https://my.server.org/cgi-bin/ciefahnaiteiQu6a`
+If you want to allow other users to use your mailpixtracker installation, I recommend generating a unique name for the script for them to use by creating a symbolic link to your mailpixtracker file, so you can remove their access simply by removing the symbolic link and associated files. `pwgen` is a handy utility to generate unique names.<br>
+E.g: `cd /my-server-cgi-directory; ln -s a-name-hard-to-guess ciefahnaiteiQu6a`<br>
+Thus you can tell them to use `https://my.server.org/cgi-bin/ciefahnaiteiQu6a`<br>
 And to remove their access: `rm /my-server-cgi-directory/ciefahnaiteiQu6a*`
 
 ## License: GPL V3 (c) 2025 Colas Nahaboo

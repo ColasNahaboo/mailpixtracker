@@ -76,6 +76,8 @@ Files auto-created in `dir` (default is the same cgi-bin directory where mailpix
 - `mailpixtracker-log/NN.meta` optionally, the metadata for the log of id `NN`, as key-space-values format one per line, with possible keys:
   - `name` the user-friendly name of the tracker, html-escaped.
   - `note` notes for this tracker, html-escaped and newlines escaped as tabs for a multi-line otes text to fit on a single metadata line
+  
+If you want to remove the logs for a tracker `NN`, just remove `mailpixtracker-log/NN` and `mailpixtracker-log/NN.meta` on your server.
 
 ## History
 

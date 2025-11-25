@@ -3,21 +3,20 @@
 This is a simple bash script to track emails via an invisible pixel, for my personal use.
 
 - Just two shell scripts: `mailpixtracker` here, and  [cgibashopts](https://github.com/ColasNahaboo/cgibashopts)
-- Only need any web server able to execute [CGI](https://en.wikipedia.org/wiki/Common_Gateway_Interface) scripts
+- Only needs any web server able to execute [CGI](https://en.wikipedia.org/wiki/Common_Gateway_Interface) scripts
 - It displays some html code to include in your emails. For GMail, you can use the HTMail extension for [Firefox](https://addons.mozilla.org/en-US/firefox/addon/htmail/) or [Chrome](https://chromewebstore.google.com/detail/htmail-insert-html-into-g/omojcahabhafmagldeheegggbakefhlh?hl=en).
 
 Note that the tracking is not foolproof. Most mailers nowadays prompt the user before loading images.
 
 ## Installation
 
-- Just copy mailpixtracker into any cgi-enabled directory on your web server,
-  and the [cgibashopts](https://github.com/ColasNahaboo/cgibashopts) script
-- You can rename mailpixtracker as you want, let's say "my-mpt". Since there are no access control, choosing a hard to guess name will act as a protection, or you can protect the access via directives of your web server.
+- Just copy the bash script `mailpixtracker` into any cgi-enabled directory on your web server, and also the [cgibashopts](https://github.com/ColasNahaboo/cgibashopts) script
+- You can rename mailpixtracker as you want, let's say "my-mpt". Since there are no access control, choosing a hard to guess name will act as a protection, or you can protect the access via directives of your web server. E.g. `https://my.server.org/cgi-bin/a-name-hard-to-guess`
 - Requirements: 
+  - any web server able to execute [CGI](https://en.wikipedia.org/wiki/Common_Gateway_Interface) scripts
+  - linux, or some linux-compatible environement (e.g. cygwin on windows)
   - bash at least version 4 (see $BASH_VERSION). V4 was released in 2010.
-  - [tac](https://man7.org/linux/man-pages/man1/tac.1.html)
-  - [base64](https://man7.org/linux/man-pages/man1/base64.1.html)
-  - [cut](https://man7.org/linux/man-pages/man1/cut.1.html)
+  - Some common linux utilities: [tac](https://man7.org/linux/man-pages/man1/tac.1.html), [base64](https://man7.org/linux/man-pages/man1/base64.1.html), [cut](https://man7.org/linux/man-pages/man1/cut.1.html)
 
 ## Configuration
 
@@ -45,9 +44,11 @@ style='<style>html {font-family: verdana,arial,geneva,helvetica,sans-serif;}</st
 
 Note that by default, mailpixtracker will create some files and a directory (all starting by the same name as the script itself) in the installation directory. You can change this via the `dir` config variable.
 
+If you want to implement access control to the script in your server, be aware that access to the `pix/NN` sub-urlshould always be enabled for all, e.g. access to `https://my.server.org/cgi-bin/mailpixtracker` may be restricted, but all accesses to `https://my.server.org/cgi-bin/mailpixtracker/pix/NN` should be allowed.
+
 ## Example
 
-The page for the tracker of ID 14 and its access logs:
+The page for the tracker of ID #17 and its access logs:
 
 ![](screenshot1.png)
 

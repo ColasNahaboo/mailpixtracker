@@ -27,7 +27,7 @@ The log page for the tracker of ID #17 and its access logs:
 ## Installation
 
 - Just copy the bash script `mailpixtracker` into any cgi-enabled directory on your web server, and also the [cgibashopts](https://github.com/ColasNahaboo/cgibashopts) script
-- You can rename the "mailpixtracker" file as you want, e.g to "a-name-hard-to-guess". Since there are no access control, choosing a hard to guess name will act as a protection, or you can protect the access via directives of your web server. <br>E.g. `https://my.server.org/cgi-bin/a-name-hard-to-guess`
+- You can rename the "mailpixtracker" file as you want, e.g to "a-name-hard-to-guess". Since there are no access control, choosing a hard to guess name will act as a protection, or you can protect the access via directives of your web server, but its more complex (see "Access Control" below). <br>E.g. `https://my.server.org/cgi-bin/a-name-hard-to-guess`
 - If using a webmail, I recommend installing a browser extension to allow easy inclusion of the generated tracker HTML code in your emails. For GMail, you can use the HTMail extension for [Firefox](https://addons.mozilla.org/en-US/firefox/addon/htmail/) or [Chrome](https://chromewebstore.google.com/detail/htmail-insert-html-into-g/omojcahabhafmagldeheegggbakefhlh?hl=en).
 - Requirements: 
   - any web server able to execute [CGI](https://en.wikipedia.org/wiki/Common_Gateway_Interface) scripts
@@ -64,6 +64,7 @@ Note that by default, mailpixtracker will create some files and a directory (all
 If you want to implement access control to the script in your server, be aware that access to the `pix/NN` sub-urlshould always be enabled for all.<br>
 E.g. access to `https://my.server.org/cgi-bin/mailpixtracker` may be restricted, but all accesses to `https://my.server.org/cgi-bin/mailpixtracker/pix/NN` should be allowed.
 
+### Access Control
 If you want to allow other users to use your mailpixtracker installation, I recommend generating a unique name for the script for them to use by creating a symbolic link to your mailpixtracker file, so you can remove their access simply by removing the symbolic link and associated files. `pwgen` is a handy utility to generate unique names.<br>
 E.g: `cd /my-server-cgi-directory; ln -s a-name-hard-to-guess ciefahnaiteiQu6a`<br>
 Thus you can tell them to use `https://my.server.org/cgi-bin/ciefahnaiteiQu6a`<br>

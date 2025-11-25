@@ -63,10 +63,11 @@ Files auto-created in `dir` (default is the same cgi-bin directory where mailpix
 - `mailpixtracker-log/NN` the log (one entry per line) of access to the tracker for id `NN`, tab-separated values of timestamp,ip,hostname,useragent
 - `mailpixtracker-log/NN.meta` optionally, the metadata for the log of id `NN`, as key-space-values format one per line, with possible keys:
   - `name` the user-friendly name of the tracker, html-escaped.
+  - `note` notes for this tracker, html-escaped and newlines escaped as tabs for a multi-line otes text to fit on a single metadata line
 
 ## History
 
-- v2.0.1 2025-11-25 smaller htmail icon.
+- v2.1.0 2025-11-25 smaller htmail icon, can edit name and note metadata
 - v2.0.0 2025-11-24
   - log lines format change: tab-separated values
   - v2 only logs in the v2 format, but can read the v1 format.

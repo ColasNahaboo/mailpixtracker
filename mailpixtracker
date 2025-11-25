@@ -3,7 +3,7 @@
 # https://github.com/ColasNahaboo/mailpixtracker
 # (c) 2025 Colas Nahaboo
 # License: GPL v3
-export VERSION=2.0.0
+export VERSION=2.1.0
 
 # parameters of the request
 # url/mailpixtracker            # main menu
@@ -37,10 +37,13 @@ export style=""
 export header=
 # optional footer code at end of html body
 export footer="<hr><a href='https://github.com/ColasNahaboo/mailpixtracker'>mailpixtracker</a> v$VERSION"
-# built-in styling is regrouped here
-export mptstyle="table.mptlog td {padding: 0.2ex 0.4em}
-table.mptlog td.useragent {font-size:small; color:#888888;}
-code.mptcode {font-size: large; background-color:#ffffdd;}
+# built-in styling is regrouped here, keeping it is recommended.
+export mptstyle="table.mptlog td {padding: 0.1rem 0.4rem}
+table.mptlog td.useragent {font-size:small; color:#888888}
+code.mptcode {font-size: large; background-color:#ffffdd}
+input,textarea {padding: 0.2rem 0.2rem}
+h1 {font-size:1.6rem}
+h2 {font-size:1.3rem}
 "
 #############################################################################
 
@@ -72,10 +75,12 @@ fi
 # We can now take our time, parse the args...
 # shellcheck disable=SC1091 # Ok to not check included file syntax
 . cgibashopts
+
+# quotes text for inclusion, and replace nl by tab for textarea contents
 html_escape() {
     local s="$1"
     s=${s//&/\&amp;}; s=${s//</\&lt;}; s=${s//>/\&gt;}
-    s=${s//\"/\&quot;}; s=${s//\'/\&#39;}
+    s=${s//\"/\&quot;}; s=${s//\'/\&#39;}; s="${s//$nl/$tab}"
     printf '%s' "$s"
 }
 
@@ -87,7 +92,7 @@ if [[ -z "$params" ]]; then
     echo "<h1>$title</h1>
           <form action='$url/new' method=POST>
           <ul><li>Create a new tracker to insert in emails named:
-          <input type=text name=name size=64 value=''>
+          <input type=text name=name size=48 value=''>
           <input type=submit value='Create'>"
     if [[ -d "$dir/$name-log" ]]; then
         echo "<li>Show logs for existing trackers:<ul>"
@@ -123,26 +128,59 @@ if [[ "$params" = /new ]]; then
     exit 0
 fi
 
+################################# META modification, then redirect to log page
+
+if [[ "$params" = /meta ]]; then
+    # shellcheck disable=SC2154 # $FORM_id is defined elsewhere
+    id="$FORM_id"
+    rest=$(grep -vsE  '^(name|note) ' "$dir/$name-log/$id.meta")
+    rm -f "$dir/$name-log/$id.meta"
+    if [[ -n "$FORM_name" ]]; then
+        qname=$(html_escape "$FORM_name")
+        echo "name $qname" >>"$dir/$name-log/$id.meta"
+    fi
+    if [[ -n "$FORM_note" ]]; then
+        qnote=$(html_escape "$FORM_note")
+        echo "note $qnote" >>"$dir/$name-log/$id.meta"
+    fi
+    [[ -n "$rest" ]] && echo "$rest" >>"$dir/$name-log/$id.meta"
+    echo "Location:$url/id/$id$nl"
+    exit 0
+fi
+
 ################################# LOG: shows the log for an ID
 
 if [[ $params =~ /id/([[:digit:]]+)$ ]]; then
     id="${BASH_REMATCH[1]}"
     idname=$(grep -soPm1 '^name +\K.*' "$dir/$name-log/$id.meta")
-    [[ -n "$idname" ]] && idname=", $idname"
-    title="Mail Pixel Tracker for $id$idname"
+    idnamef=; [[ -n "$idname" ]] && idnamef=", $idname"
+    idnoteq=$(grep -soPm1 '^note +\K.*' "$dir/$name-log/$id.meta")
+    idnote="${idnoteq//$tab/$nl}"
+    idnotenls="${idnoteq//[^$tab]/}"
+    idnotel=$((${#idnotenls} + 2)) # number of notes lines
+    title="Mail Pixel Tracker for $id$idnamef"
     mkdir -p "$dir"
-    echo "Content-Type:text/html"; echo
-    echo "<!doctype html><head>$style<style>$mptstyle</style><title>$title</title></head><body>$header"
-    echo "<a href='$url'>[Main Menu]</a><br>"
-    echo "<h1>$title</h1>
-<p>To insert a tracker of ID # $id in an email, 
-insert the below code in gmail via <a href='https://addons.mozilla.org/en-US/firefox/addon/htmail/'>HTMail</a><br />(icon: <img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAMAAADzapwJAAAAAXNSR0IB2cksfwAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAgFQTFRFAAAAAAAAREdGREdGREdGREdGREdGRklIRUhHREdGRklIU1ZVS05NWVxbS05NRklIVFdWXmFgRklISUxLc3V0XV9eW11dTlFQRUhHTlFQXV9fWFtaUFNSR0pJSUxLS05NRklIV1lZS05NRklITE9OoqOiZ2loTE9ORklIRUhHTE9OV1pZRklITE5OTVBPR0pJSUxLWFpaSEtKSEtKVVhXTU9ORUhHUVRTZWdmTE9OREdGRklIT1JRUFJRRklIRUhHTE9OXmFgdHd2SEtKR0pJd3p5U1VUS05Nd3p5SEtKTE9Ob3FwRUhHTlFQUVRTRklIRklIW15dU1VVSEtKSEtKT1JRSk1MRklIVVhXV1pZSk1MRklITE9OXmFgSUxLRUhHRklIS05Nam1sWFtaR0pJSEtKUFJRSEtKRUhHSEtKUlVUTlFQR0pJTVBPRUhHTU9OTU9PRUhHRkhHS05NaGtqWFtaS05NSUxLSEtKR0lIZmdnTE9OR0pJVFdW0NHRiIqJcHNySk1M6OjoYmVkUFNSRklITE9OUlVUWVxbSUxLR0pJR0pJSEtKhIaFUlVUSUxLRklITE5OTU9OTlBPSEtKRUhHY2VkTE9OSEtKSk1MVVhXVFZVSk1MTE5NUlVUSUxLTVBPZGZlTU9OR0pJYWRjeXp5UFNSSUxLRUhHSEtKTE9OQSeK0AAAAAF0Uk5TAEDm2GYAAAABYktHRACIBR1IAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAB3RJTUUH6QsZBDAYbH3PlwAAAGpJREFUGNOtkTESgEAIAzNpQm/NJ+53/l4d9eDktJJyJwlMADgZgCrQRNBQZpcfjm/sc6wndl1iecJKGeq4eVrnHiEaxLFyAdYIernbArebNWNVy86uhk56bUevltwJk+ruAdc//ILnL94Az6AE8m6Sfn0AAAAASUVORK5CYII='> at the bottom right of the mail compose window)
-<p>
-<code class=mptcode>&lt;img src='$url/pix/$id' width='1' height='1'&gt;</code>
-<p>"
+    echo "Content-Type:text/html
+
+<!doctype html><head>$style<style>$mptstyle</style><title>$title</title></head><body>$header
+       <a href='$url'>[Main Menu]</a><br>
+       <h1>$title</h1>
+       <p>To insert a tracker of ID # $id in an email, insert the below code in gmail via <a href='https://addons.mozilla.org/en-US/firefox/addon/htmail/'>HTMail</a><br />(icon:
+       <img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAMAAADzapwJAAAAAXNSR0IB2cksfwAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAgFQTFRFAAAAAAAAREdGREdGREdGREdGREdGRklIRUhHREdGRklIU1ZVS05NWVxbS05NRklIVFdWXmFgRklISUxLc3V0XV9eW11dTlFQRUhHTlFQXV9fWFtaUFNSR0pJSUxLS05NRklIV1lZS05NRklITE9OoqOiZ2loTE9ORklIRUhHTE9OV1pZRklITE5OTVBPR0pJSUxLWFpaSEtKSEtKVVhXTU9ORUhHUVRTZWdmTE9OREdGRklIT1JRUFJRRklIRUhHTE9OXmFgdHd2SEtKR0pJd3p5U1VUS05Nd3p5SEtKTE9Ob3FwRUhHTlFQUVRTRklIRklIW15dU1VVSEtKSEtKT1JRSk1MRklIVVhXV1pZSk1MRklITE9OXmFgSUxLRUhHRklIS05Nam1sWFtaR0pJSEtKUFJRSEtKRUhHSEtKUlVUTlFQR0pJTVBPRUhHTU9OTU9PRUhHRkhHS05NaGtqWFtaS05NSUxLSEtKR0lIZmdnTE9OR0pJVFdW0NHRiIqJcHNySk1M6OjoYmVkUFNSRklITE9OUlVUWVxbSUxLR0pJR0pJSEtKhIaFUlVUSUxLRklITE5OTU9OTlBPSEtKRUhHY2VkTE9OSEtKSk1MVVhXVFZVSk1MTE5NUlVUSUxLTVBPZGZlTU9OR0pJYWRjeXp5UFNSSUxLRUhHSEtKTE9OQSeK0AAAAAF0Uk5TAEDm2GYAAAABYktHRACIBR1IAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAB3RJTUUH6QsZBDAYbH3PlwAAAGpJREFUGNOtkTESgEAIAzNpQm/NJ+53/l4d9eDktJJyJwlMADgZgCrQRNBQZpcfjm/sc6wndl1iecJKGeq4eVrnHiEaxLFyAdYIernbArebNWNVy86uhk56bUevltwJk+ruAdc//ILnL94Az6AE8m6Sfn0AAAAASUVORK5CYII='> at the bottom right of the mail compose window)
+        <p>
+        <code class=mptcode>&lt;img src='$url/pix/$id' width='1' height='1'&gt;</code>
+        <p>
+        <h2>Info</h2>
+        <form action='$url/meta' method=POST>
+        <input type=hidden name=id value='$id'>
+        <table class=mptlog><tr><th>Name:<td><input type=text name=name size=64 value='$idname'>
+        <tr><th>Notes:<td><textarea name=note rows=$idnotel cols=71>$idnote</textarea>
+        <tr style='text-align:left'><td><td><input type=submit value='Modify'>
+        </table></form>
+        <h2>Access logs</h2>"
     if [[ -s "$dir/$name-log/$id" ]]; then
-	echo "<h2>Access logs for $id$idname</h2><br><table class=mptlog>"
-        echo "<tr><th>Date+Time<th>IP address<th>Hostname<th>User Agent"
+        echo "<table class=mptlog>
+        <tr><th>Date+Time<th>IP address<th>Hostname<th>User Agent"
         # To maximize perceptual spacing, I used golden-angle hue sampling
         # (137.508° steps), a well-known approximation of greedy max-min spacing
         # to allow distinct colors to distinct IPs
@@ -212,7 +250,7 @@ insert the below code in gmail via <a href='https://addons.mozilla.org/en-US/fir
         done < <(tac "$dir/$name-log/$id")
         echo "</table>"
     else
-	echo "No access logs yet for ID # $id$nl"
+	echo "No access logs yet"
     fi
     echo "$footer</body>"
     exit 0

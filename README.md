@@ -4,14 +4,25 @@ This is a simple bash script to track emails via an invisible pixel, for my pers
 
 - Just two shell scripts: `mailpixtracker` here, and  [cgibashopts](https://github.com/ColasNahaboo/cgibashopts)
 - Only needs any web server able to execute [CGI](https://en.wikipedia.org/wiki/Common_Gateway_Interface) scripts
-- It displays some html code to include in your emails. For GMail, you can use the HTMail extension for [Firefox](https://addons.mozilla.org/en-US/firefox/addon/htmail/) or [Chrome](https://chromewebstore.google.com/detail/htmail-insert-html-into-g/omojcahabhafmagldeheegggbakefhlh?hl=en).
+- It generates for you a simple HTML line to include in your emails
 
 Note that the tracking is not foolproof. Most mailers nowadays prompt the user before loading images.
+
+## Usage
+- Go to the script URL on your web server.
+- Create a new tracker. You will need one separate tracker (with a unique ID number) for each email, to track each email in a separate log. You can optionally add a meaningful name.
+- Mailpixtracker will then show you the log page for the tracker. You can edit its name and various notes at any time.
+- When composing your email, copy/paste into it the yellow highlighted HTML line at the top of the log page, via your installed browser extension or email software.
+- Note that the log will begin to fill up while composing your mail once the tracker is installed. The first lines in the log - yours - are always highlighted in grey, to differentiate them from recipients.
+- Once the email is sent, each time people will read it, and have allowed their mailers to display images, the mailtracker log page will add an entry.
+- Log entries are colored with a different color for each client IP address, for ease of reading.
+- The Notes field is a convenient way to store details about the sent email for this tracker ID, as well as remembering which timestamps correspond to specific events. Use it!
 
 ## Installation
 
 - Just copy the bash script `mailpixtracker` into any cgi-enabled directory on your web server, and also the [cgibashopts](https://github.com/ColasNahaboo/cgibashopts) script
 - You can rename mailpixtracker as you want, let's say "my-mpt". Since there are no access control, choosing a hard to guess name will act as a protection, or you can protect the access via directives of your web server. E.g. `https://my.server.org/cgi-bin/a-name-hard-to-guess`
+- If using a webmail, I recommend installing a browser extension to allow easy inclusion of the generated tracker HTML code in your emails. For GMail, you can use the HTMail extension for [Firefox](https://addons.mozilla.org/en-US/firefox/addon/htmail/) or [Chrome](https://chromewebstore.google.com/detail/htmail-insert-html-into-g/omojcahabhafmagldeheegggbakefhlh?hl=en).
 - Requirements: 
   - any web server able to execute [CGI](https://en.wikipedia.org/wiki/Common_Gateway_Interface) scripts
   - linux, or some linux-compatible environement (e.g. cygwin on windows)

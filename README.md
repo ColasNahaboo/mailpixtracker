@@ -9,7 +9,7 @@ This is a simple bash script to track emails via an invisible pixel, for my pers
 Note that the tracking is not foolproof. Most mailers nowadays prompt the user before loading images.
 
 ## Usage
-- Go to the script URL on your web server. E.g: `https://my.server.org/cgi-bin/mailpixtracker`
+- Go to the script URL on your web server.<br>E.g: `https://my.server.org/cgi-bin/mailpixtracker`
 - Create a new tracker. You will need one separate tracker (with a unique ID number) for each email, to track each email in a separate log. You can optionally add a meaningful name.
 - Mailpixtracker will then show you the log page for the tracker. You can edit its name and various notes at any time.
 - When composing your email, copy/paste into it the yellow highlighted HTML line at the top of the log page, via your installed browser extension or email software.
@@ -27,7 +27,7 @@ The log page for the tracker of ID #17 and its access logs:
 ## Installation
 
 - Just copy the bash script `mailpixtracker` into any cgi-enabled directory on your web server, and also the [cgibashopts](https://github.com/ColasNahaboo/cgibashopts) script
-- You can rename the "mailpixtracker" file as you want, e.g to "a-name-hard-to-guess". Since there are no access control, choosing a hard to guess name will act as a protection, or you can protect the access via directives of your web server. E.g. `https://my.server.org/cgi-bin/a-name-hard-to-guess`
+- You can rename the "mailpixtracker" file as you want, e.g to "a-name-hard-to-guess". Since there are no access control, choosing a hard to guess name will act as a protection, or you can protect the access via directives of your web server. <br>E.g. `https://my.server.org/cgi-bin/a-name-hard-to-guess`
 - If using a webmail, I recommend installing a browser extension to allow easy inclusion of the generated tracker HTML code in your emails. For GMail, you can use the HTMail extension for [Firefox](https://addons.mozilla.org/en-US/firefox/addon/htmail/) or [Chrome](https://chromewebstore.google.com/detail/htmail-insert-html-into-g/omojcahabhafmagldeheegggbakefhlh?hl=en).
 - Requirements: 
   - any web server able to execute [CGI](https://en.wikipedia.org/wiki/Common_Gateway_Interface) scripts

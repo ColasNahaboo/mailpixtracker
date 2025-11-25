@@ -66,6 +66,7 @@ Files auto-created in `dir` (default is the same cgi-bin directory where mailpix
 
 ## History
 
+- v2.0.1 2025-11-25 smaller htmail icon.
 - v2.0.0 2025-11-24
   - log lines format change: tab-separated values
   - v2 only logs in the v2 format, but can read the v1 format.

@@ -89,7 +89,8 @@ If you want to remove the logs for a tracker `NN`, just remove `mailpixtracker-l
 
 ## History
 
-- v2.2.0 2025-11-25 new log entries signalled.
+- v2.2.1 2025-11-27 optional global mpt.conf for all names, env var MAILPIXTRACKER_GLOBALCONF
+- v2.2.0 2025-11-25 new log entries signaled.
 - v2.1.1 2025-11-25 UI display now "#NN" instead of "for NN"
 - v2.1.0 2025-11-25 smaller htmail icon, can edit name and note metadata
 - v2.0.0 2025-11-24

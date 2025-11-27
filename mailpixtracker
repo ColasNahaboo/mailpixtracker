@@ -3,7 +3,7 @@
 # https://github.com/ColasNahaboo/mailpixtracker
 # (c) 2025 Colas Nahaboo
 # License: GPL v3
-export VERSION=2.2.0
+export VERSION=2.2.1
 
 # parameters of the request
 # url/mailpixtracker            # main menu
@@ -17,10 +17,15 @@ name="${SCRIPT_NAME##*/}"       # the name of the script, can be anything
 url="$ROOT_URL$SCRIPT_NAME"     # its URL
 params="$PATH_INFO"             # arguments of the request
 nl=$'\n';  tab=$'\t'            # some useful constants
-# shellcheck disable=SC2034
+# shellcheck disable=SC2034     # don't warn when L is unused
 L=/tmp/mailpixtracker.log       # debuging by echo "..." >>$L
 
-# you can redefine the location of the config file via this env variable
+# you can redefine the location of the optional config files via env variables
+# global for all names
+if [[ -n "$MAILPIXTRACKER_GLOBALCONF" ]]; then gconfig="$MAILPIXTRACKER_GLOBALCONF"
+else gconfig="mpt.conf"
+fi
+# only for this script name
 if [[ -n "$MAILPIXTRACKER_CONF" ]]; then config="$MAILPIXTRACKER_CONF"
 else config="$name.conf"
 fi
@@ -48,8 +53,10 @@ h2 {font-size:1.3rem}
 "
 #############################################################################
 
-# load config file if present as a bash script to redefine the above vars
+# load config files if present as a bash script to redefine the above vars
 # shellcheck disable=SC1090 # Ok to not check included file syntax
+[[ -e "$gconfig" ]] && . "$gconfig"
+# shellcheck disable=SC1090
 [[ -e "$config" ]] && . "$config"
 
 ################################# TRACK: provide a 1x1 pixel, log the ID access
@@ -73,6 +80,7 @@ if [[ $params =~ /pix/([[:digit:]]+)$ ]]; then
     exit 0
 fi
 
+################################# REST
 # We can now take our time, parse the args...
 # shellcheck disable=SC1091 # Ok to not check included file syntax
 . cgibashopts

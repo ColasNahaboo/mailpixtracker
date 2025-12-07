@@ -3,7 +3,7 @@
 # https://github.com/ColasNahaboo/mailpixtracker
 # (c) 2025 Colas Nahaboo
 # License: GPL v3
-export VERSION=2.2.1
+export VERSION=2.2.2
 
 # parameters of the request
 # url/mailpixtracker            # main menu
@@ -190,7 +190,7 @@ if [[ $params =~ /id/([[:digit:]]+)$ ]]; then
         <h2>Access logs</h2>"
     if [[ -s "$dir/$name-log/$id" ]]; then
         echo "<table class=mptlog>
-        <tr><th><th>Date+Time<th>IP address<th>Hostname<th>User Agent"
+        <tr><th>#<th>Date+Time<th>IP address<th>Hostname<th>User Agent"
         # To maximize perceptual spacing, I used golden-angle hue sampling
         # (137.508° steps), a well-known approximation of greedy max-min spacing
         # to allow distinct colors to distinct IPs
@@ -254,7 +254,7 @@ if [[ $params =~ /id/([[:digit:]]+)$ ]]; then
                 ipx="${ips[$ipk]}"
                 color="${colors[$ipx]}"
                 isnew=old; [[ "$date" > "$lastseen" ]] && isnew=new
-                echo "<tr style='background-color:$color'><td class=$isnew><td><b>$date</b><td>$ip<td><i>$host</i><td class=useragent>$agent</small></tr>"
+                echo "<tr style='background-color:$color'><td class='$isnew idx'>$ipx<td><b>$date</b><td>$ip<td><i>$host</i><td class=useragent>$agent</small></tr>"
             else                # unknown format
                 echo "<tr style='background-color:$color_unknown'><td><td colspan=4>${line}"
             fi

@@ -89,6 +89,7 @@ If you want to remove the logs for a tracker `NN`, just remove `mailpixtracker-l
 
 ## History
 
+- v2.2.2 2025-12-07 IP adress index number shown in left column of logs
 - v2.2.1 2025-11-27 optional global mpt.conf for all names, env var MAILPIXTRACKER_GLOBALCONF
 - v2.2.0 2025-11-25 new log entries signaled.
 - v2.1.1 2025-11-25 UI display now "#NN" instead of "for NN"

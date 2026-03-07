@@ -203,8 +203,9 @@ main(){
     # Section: create a new tracker
     echo "<form method=POST enctype='multipart/form-data' class=container>
           Create a new tracker to insert in emails:<p>
+          <input type=hidden name=newid value=true>
           <table>
-          <tr><td>Name:<td><input type=text name=newid size=48 value=''>
+          <tr><td>Name:<td><input type=text name=name size=48 value=''>
           <tr><td>Note:<td><textarea name=note rows=3 cols=64></textarea>
           <tr><td colspan=2><input class='btn' type='submit' value='Create'>
           </table></form>"
@@ -302,7 +303,7 @@ main-admin(){
           <table>
           <tr><td>Name:<td><input type=text name=newguest size=12 value=''>
           <td><i>short id: letters, numbers, hyphen, dot, underscore</i>
-          <tr><td>Note:<td colspan=2><input type=text name=note size=64 value=''> <i>Description</i>
+          <tr><td>Note:<td colspan=2><input type=text name=note size=64 value=''>$sp$sp$sp<i>Description</i>
           <tr><td><label for=isadmin style='cursor: pointer;'>Is Admin:</label>
           <td><input type=checkbox id=isadmin name=isadmin value=yes>
           <td><i>Non-admins have no way to access the admin account. Admin guests have a tab to become the admin</i>
@@ -345,7 +346,7 @@ main-guest(){
 ################################# NEW Tracker ID creation, redirects to id page
 
 create-id(){
-    local name="$1" id idpass
+    local name="$1" note="$2" id idpass
     # find next available id
     mkdir -p "$data"
     # shellcheck disable=SC2010,SC2012   # Allow ls instead of find
@@ -353,7 +354,7 @@ create-id(){
     ((id++))
     idpass="$id-"$(random_string $passlen)
     true >"$data/$idpass.log"
-    metas=([name]=$(html_escape "$name") [note]=$(html_escape "$FORM_note"))
+    metas=([name]=$(html_escape "$name") [note]=$(html_escape "$note"))
     meta-write-raw "$data/$idpass.meta"
     redirect "?mode=logs&id=$id&info=new_tracker_created"
 }
@@ -396,7 +397,7 @@ save-guest(){
     local gid="${1//[^-_.[:alnum:]]/}" name="$2" note="$3" admin="$4"
     local meta="$data/~$gid/meta"
     [[ -e "$meta" ]] || redirect "?mode=admin&info=error:_try_to_save_unknown_guest_id:_$gid"
-    metas=()
+    meta-read-raw "$meta"
     metas[note]="$note"
     metas[admin]="$admin"
     meta-write-raw "$meta"
@@ -422,10 +423,10 @@ del-id(){
     local id="${1//[^[:digit:]]/}" gid="${2//[^-_.[:alnum:]]/}"
     local meta metafile=("$data"/"$id"-*.meta) trash="$data/trash"
     meta="${metafile[0]}"
-    [[ -e "$meta" ]] || redirect "?&info=error:_try_to_delete_unknown_tracker_id:_$id"
+    [[ -e "$meta" ]] || redirect "?info=error:_try_to_delete_unknown_tracker_id:_$id"
     mkdir -p "$trash"
     mv "$data/$id-"* "$trash"
-    redirect "&info=tracker_${id}_deleted"
+    redirect "?mode=trackers&info=tracker_${id}_deleted"
 }
 
 ################################# Misc utils
@@ -566,7 +567,7 @@ PPprintln(){ [[ -n "$PPLOG" ]] && echo "${1@Q}" >>"$PPLOG" || echo "${1@Q}";}
 # backoffice operations
 # shellcheck disable=SC2154             # FORM_xxx are defined by cgibashopts
 if [[ -n "$FORM_newid" ]] && $isadmin; then
-    create-id "$FORM_newid"
+    create-id "$FORM_name" "$FORM_note"
 elif [[ -n "$FORM_editid" ]]; then
     save-id "$FORM_editid" "$FORM_name" "$FORM_note"
 elif [[ -n "$FORM_newguest" ]] && $isadmin; then

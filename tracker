@@ -4,7 +4,7 @@
 
 nl=$'\n';  tab=$'\t'            # some useful constants
 dateformat='%Y-%m-%d.%Hh%M,%S' # format of dates in logs.
-pixel=../data/1px.png
+pixel=../data/p.png
 # cache 1x1 transparent pixel PNG if needed
 [[ -e "$pixel" ]] ||
     base64 -d <<<'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==' >"$pixel"
@@ -12,7 +12,7 @@ pixel=../data/1px.png
 # Then log only if the url was a valid one:
 # mpturl/_/NN-nnpass or mpturl/_/~guestid/NN-nnpass
 if [[ $PATH_INFO =~ (/[~][[:alnum:]]+)?/[[:digit:]]+-[[:alnum:]]+$ ]]; then
-    meta=../data"$PATH_INFO"
+    meta=../data"$PATH_INFO".meta
     # log only if metafile exists: was properly created by the admin GUI
     if [[ -e "$meta" ]]; then
         date=$(date +"$dateformat")
@@ -20,7 +20,7 @@ if [[ $PATH_INFO =~ (/[~][[:alnum:]]+)?/[[:digit:]]+-[[:alnum:]]+$ ]]; then
         clientname=
         [[ $clienthost =~ 'domain name pointer '(.+)[.]$ ]] &&
             clientname="${BASH_REMATCH[1]}"
-        echo "$date${tab}$REMOTE_ADDR${tab}$clientname${tab}$HTTP_USER_AGENT" >>"$meta".log
+        echo "$date${tab}$REMOTE_ADDR${tab}$clientname${tab}$HTTP_USER_AGENT" >>"${meta%.meta}".log
     fi
 fi
 

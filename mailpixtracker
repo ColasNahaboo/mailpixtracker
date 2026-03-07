@@ -4,7 +4,7 @@ export VERSION=3.0.0
 export PROGNAME='Mail Pix Tracker'
 export source='https://github.com/ColasNahaboo/mailpixtracker'
 export copyright='(c)2026 Colas Nahaboo, MIT License'
-export PPLOG=/tmp/mpt.log       # can be used for debugging with PP functions
+#export PPLOG=/tmp/mpt.log       # can be used for debugging with PP functions
 
 ###################### CSS Style
 
@@ -15,26 +15,21 @@ export style='
     --dim: #6e7781; --ip: #0969da; --path: #bc4c00;
     --border: #d0d7de; --highlight: #fff8c5;
 }
-
 body {
     background: var(--bg); color: var(--text);
     font-family: Proxima Nova, system-ui, -apple-system, sans-serif;
     margin: 0; font-size: 14px;
 }
-
 .container { margin: 0 auto; padding: 20px; }
 .minicontainer { padding: 10px 20px; }
-
 pre, code, .log-line, .mptcode {
     font-family: "SFMono-Regular", Consolas, monospace; font-size: 13px;
 }
-
 /* Headings: Grouped by shared traits */
 h1, h2, h3, h4, h5, h6 { font-weight: normal; margin: 10px 0 5px; }
 h1 { font-size: 170%; } h2 { font-size: 145%; } h3 { font-size: 130%; }
 h4, h5, h6 { font-weight: bold; }
 h4 { font-size: 120%; } h5 { font-size: 110%; } h6 { font-size: 95%; }
-
 /* Sticky Header */
 .header {
     position: sticky; top: 0; z-index: 1000;
@@ -42,7 +37,6 @@ h4 { font-size: 120%; } h5 { font-size: 110%; } h6 { font-size: 95%; }
     border-bottom: 1px solid var(--border); padding: 15px 20px;
     display: flex; justify-content: space-between; align-items: center;
 }
-
 /* Buttons */
 .btn, .btn2 {
     padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border);
@@ -50,37 +44,32 @@ h4 { font-size: 120%; } h5 { font-size: 110%; } h6 { font-size: 95%; }
 }
 .btn:hover { background: #f6f8fa; }
 .btn2 { background: #afa; } .btn2:hover { background: #8f8; }
-
-/* Status Blocks */
-.resultok, .resultfail { padding: 16px; border-left: 4px solid; }
-.resultok { background: #f0fff0; border-left-color: green; }
-.resultfail { background: #fff0f0; border-left-color: red; }
-
+/* Info Blocks */
+div.info { padding: 16px; border-left: 4px solid; }
+div.ok { background: #f0fff0; border-left-color: green; }
+div.error { background: #fff0f0; border-left-color: red; }
+div.warning { background: #fffbeb; border-left-color: #d97706; }
 /*============================================== Navigation */
 .main-header {
     display: flex; align-items: baseline; padding: 10px 20px;
     background: #f8f9fa; border-bottom: 1px solid #ddd;
 }
-
 .brand { font-weight: bold; font-size: 1.2em; }
 .brand a { text-decoration: none; color: inherit; }
-
+img.logo {vertical-align:bottom;}
 /* Merged the two .nav-tabs blocks into one */
 .nav-tabs a {
     margin-left: 20px; padding: 5px 10px; text-decoration: none;
     color: var(--ip); background: #eee; border: 1px solid #ccc;
     border-bottom: none; border-radius: 5px 5px 0 0;
 }
-
 .nav-tabs a.active {
     pointer-events: none; cursor: default; color: #333;
     border-bottom: 2px solid var(--ip); font-weight: bold;
 }
-
 /* Tables & Logs */
 table { width: 100%; border-collapse: collapse; background: #fff; }
 th, td { text-align: left; padding: 8px 12px; border: 1px solid #e1e4e8; }
-
 .log-line {
     padding: 4px 12px; border-left: 3px solid #aaa;
     border-bottom: 1px solid #f0f0f0; white-space: pre-wrap;
@@ -101,14 +90,16 @@ logo='iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IB2cksfwAAAARnQU1BAA
 
 htmail_logo='iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAMAAADzapwJAAAAAXNSR0IB2cksfwAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAgFQTFRFAAAAAAAAREdGREdGREdGREdGREdGRklIRUhHREdGRklIU1ZVS05NWVxbS05NRklIVFdWXmFgRklISUxLc3V0XV9eW11dTlFQRUhHTlFQXV9fWFtaUFNSR0pJSUxLS05NRklIV1lZS05NRklITE9OoqOiZ2loTE9ORklIRUhHTE9OV1pZRklITE5OTVBPR0pJSUxLWFpaSEtKSEtKVVhXTU9ORUhHUVRTZWdmTE9OREdGRklIT1JRUFJRRklIRUhHTE9OXmFgdHd2SEtKR0pJd3p5U1VUS05Nd3p5SEtKTE9Ob3FwRUhHTlFQUVRTRklIRklIW15dU1VVSEtKSEtKT1JRSk1MRklIVVhXV1pZSk1MRklITE9OXmFgSUxLRUhHRklIS05Nam1sWFtaR0pJSEtKUFJRSEtKRUhHSEtKUlVUTlFQR0pJTVBPRUhHTU9OTU9PRUhHRkhHS05NaGtqWFtaS05NSUxLSEtKR0lIZmdnTE9OR0pJVFdW0NHRiIqJcHNySk1M6OjoYmVkUFNSRklITE9OUlVUWVxbSUxLR0pJR0pJSEtKhIaFUlVUSUxLRklITE5OTU9OTlBPSEtKRUhHY2VkTE9OSEtKSk1MVVhXVFZVSk1MTE5NUlVUSUxLTVBPZGZlTU9OR0pJYWRjeXp5UFNSSUxLRUhHSEtKTE9OQSeK0AAAAAF0Uk5TAEDm2GYAAAABYktHRACIBR1IAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAB3RJTUUH6QsZBDAYbH3PlwAAAGpJREFUGNOtkTESgEAIAzNpQm/NJ+53/l4d9eDktJJyJwlMADgZgCrQRNBQZpcfjm/sc6wndl1iecJKGeq4eVrnHiEaxLFyAdYIernbArebNWNVy86uhk56bUevltwJk+ruAdc//ILnL94Az6AE8m6Sfn0AAAAASUVORK5CYII='
 
+editicon='iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IB2cksfwAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB+oDBxMhHVCFtD4AAAG8SURBVDjLpdS7axRBHAfwz+wFCy3TCD5u8bBQBFGxFnwgMYKNEtMoiDEWiqW2IopgqQgSX2gkphFRixTiqzZWooWc7BkEi/wDGm7HZg7XkOQuZGCaHeYz3/nNzAYrbI16fgCPEXAyrBAbwLPUV2P3f2C+Lg+CRReJUWz9LGLCDuI5SmzDDezoS4MncBXru4T6iq0VbAI78SXBA6FRz4dxG2fxGr+XAP9gD15gPLbjaKiFcRzBoWareN+Hi7jQbBWTPdRs/zzsQRWDDNtT5G7YPrzEeFnqYEerWAfs5TT3JuxJjHE0y9xP2GAV6wlM2CtMtMv2mRDCPRzDYFmWHxr1/OOmDRtDT+A8bKSW1e5iKCV7F2OsYVcIMesKVrGybaSW1cZwvIMtNi/rgj0tYxzJasYwjMPNVvF2qV1lC2D96WpMivF0FkIVe9Ot5gslPIc5XLJMDPrmpVuD85jF5/Tge8YWSngK/ViLR8iXg3USxtThGy7jVrNVzHZNk2Wr0l+orILT6flNN1vFFKZ6TRNC2I9f32dmYhW8joeNej6HT5W03doW3Ew7+rdIOowhXMHmZZTrB641W8Wd6se/E8WtW4e9Pz0AAAAASUVORK5CYII='
+
 ###################### Common
 
 ROOT_URL="$REQUEST_SCHEME://$HTTP_HOST"
-scriptname="${SCRIPT_NAME##*/}" # adminpass or guestpass~guestid
-url="$ROOT_URL$SCRIPT_NAME"     # its URL
-urlp="$ROOT_URL/_"              # URL of pixel logger mini-script
-data=$(realpath '../data')      # metadata, logs, caches, guest ids...
-nl=$'\n';  tab=$'\t'            # some useful constants
+adminpass="${SCRIPT_NAME##*/}"   # adminpass or guestpass~guestid
+url="$ROOT_URL$SCRIPT_NAME"      # its URL
+urlp="$ROOT_URL/_"               # URL of pixel logger mini-script
+data=$(realpath '../data')       # metadata, logs, caches, guest ids...
+nl=$'\n'; tab=$'\t'; sp='&nbsp;' # some useful constants
 # true ISO is YYYY-MM-DDTHH:MN:SS, but we use more readbale: YYYY-MM-DD.HHhMN,SS
 export dateformat='%Y-%m-%d.%Hh%M,%S' # format of dates in logs.
 passlen=8                # length of the random "passwords", 10^14 combinations
@@ -122,6 +113,11 @@ if [[ $SCRIPT_NAME =~ /([[:alnum:]]+)([~][-_.[:alnum:]]+)$ ]]; then
     isadmin=false
     data="$data$gid"
     urlp="$urlp$gid"
+    # shellcheck disable=SC1091
+    [[ -e "$data/meta" ]] && . "$data/meta"
+    isguestadmin=false
+    [[ "${metas[admin]}" == true ]] && isguestadmin=true || isguestadmin=false
+    adminpass=$(readlink "${SCRIPT_NAME##*/}")
 else
     gid=                            # admin
     isadmin=true
@@ -143,8 +139,16 @@ header(){
         echo "<a href='$url' class='tab${BASH_REMATCH[1]:+ active}'>Trackers</a>"
     [[ $tabs =~ ,logs(!)?, ]] &&
         echo "<a href='$url?mode=logs&id=$id' class='tab${BASH_REMATCH[1]:+ active}'>Tracker #$id</a>"
-    [[ $tabs =~ ,admin(!)?, ]] && $isadmin &&
-        echo "<a href='$url?mode=admin' class='tab${BASH_REMATCH[1]:+ active}'>Admin</a>"
+    if [[ $tabs =~ ,admin(!)?, ]]; then
+        if $isadmin; then
+            echo "<a href='$url?mode=admin' class='tab${BASH_REMATCH[1]:+ active}'>Admin</a>"
+        elif "$isguestadmin"; then
+            echo "<a href='$adminpass?mode=admin' class='tab${BASH_REMATCH[1]:+ active}'>Admin</a>"
+        fi
+    fi
+    # shellcheck disable=SC2154        # FORM_xxx are defined by cgibashopts
+    [[ $tabs =~ ,guest(!)?, ]] &&
+        echo "<a href='$url' class='tab${BASH_REMATCH[1]:+ active}'>Account ${FORM_gid}</a>"
     echo "</nav></header>"
 }
 is-active(){
@@ -153,122 +157,186 @@ is-active(){
 footer(){
     echo "<hr><div class=minicontainer>$version</div></body></html>"
 }
+info(){
+    # shellcheck disable=SC2154 # FORM_xxx are defined by cgibashopts
+    local mess="$FORM_info" class=info
+    [[ -n "$mess" ]] || return
+    [[ $mess =~ ^([[:alnum:]]+): ]] && class="$class ${BASH_REMATCH[1]}"
+    [[ "$class" == info ]] && class="$class ok"
+    mess="${mess//_/ }"
+    echo "<div class='$class'>${mess^}</div>"
+}
+redirect(){
+    echo "Location:$1$nl"
+    exit 0
+}
 
 ################################# Frontoffice: GUI functions
 
-################################# MAIN mode
+################################# MAIN (trackers) mode
 
 main(){
-    local tabs="$1" idpass id pass idname last # idpass=NN-nnpass
+    local tabs="$1" idpass id idpass idname last # idpass=NN-nnpass
     header '' "$tabs"
-    # Section: create a new tracker
-    echo "<div class=minicontainer>"
-    echo "<form method=POST enctype='multipart/form-data' class=container>
-          <ul><li>Create a new tracker to insert in emails named:
-          <input type=text name=newid size=48 value=''>
-          <input type=submit value='Create'></form>"
+    info
     # Section: list existing trackers
     if [[ -d "$data" ]]; then
-        echo "<li>Show logs for existing trackers:<ul>"
+        echo "<div class=container>Existing trackers:<ul>"
         # shellcheck disable=SC2010,SC2012   # Allow ls instead of find
-        while read -r idpass; do
+        for meta in "$data"/[0-9]*.meta; do
+            [[ -e "$meta" ]] || continue
+            idpass="${meta##*/}"; idpass="${idpass%.*}"
             id="${idpass%%-*}"
-            pass="${idpass#*-}"
-            if [[ -e "$data/$idpass" ]]; then
-                last=$(tail -1 "$data/$idpass.log" 2>/dev/null | cut -f 1 -d ' ')
-                idname=$(grep -soPm1 '^name +\K.*' "$data/$idpass")
-                [[ -n "$idname" ]] && idname=" <b>$idname</b>"
-                echo "<li><a href='?mode=logs&id=$id'>#$id</a>$idname"
-                if [[ -n "$last" ]]; then
-                    echo ", last log on $last</li>"
-                else
-                    echo " <span class=guest>(no access logs yet)</span>"
-                fi                  
-            fi
-        done < <(ls -1 "$data" | grep -oP '^[[:digit:]]+-[[:alnum:]]+$' | sort -nr)
-        echo "</ul></form>"
+            last=$(tail -1 "${meta%.*}.log" 2>/dev/null | cut -f 1 -d $'\t')
+            meta-read-raw "$meta"
+            idname=
+            [[ -n "${metas[name]}" ]] && idname=" <b>${metas[name]}</b>"
+            echo -n "<li><a href='?mode=logs&id=$id' title='See logs of #$id'>#$id</a>$sp$sp$sp$idname"
+            if [[ -n "$last" ]]; then
+                echo ", last log on $last"
+            else
+                echo " <span class=guest>(no access logs yet)</span>"
+            fi                  
+        done
+        echo "</ul></div>"
     fi
-    echo "</ul>"
+    # Section: create a new tracker
+    echo "<form method=POST enctype='multipart/form-data' class=container>
+          Create a new tracker to insert in emails:<p>
+          <table>
+          <tr><td>Name:<td><input type=text name=newid size=48 value=''>
+          <tr><td>Note:<td><textarea name=note rows=3 cols=64></textarea>
+          <tr><td colspan=2><input class='btn' type='submit' value='Create'>
+          </table></form>"
     footer
 }
 
 ################################# Logs of ID, and other info
 
 main-logs(){
-    local id="$1" tabs="$2" pass idname idnoteq idnote idnotenls idnotel
-    # shellcheck disable=SC2010,SC2012   # Allow ls instead of find
-    pass=$(ls -1 "$data/$id-"* | grep -oPm1 -- '-\K[[:alnum:]]+')
-    idname=$(grep -soPm1 '^name +\K.*' "$data/$id-$pass")
-    idnoteq=$(grep -soPm1 '^note +\K.*' "$data/$id-$pass")
-    idnote="${idnoteq//$tab/$nl}"
-    idnotenls="${idnoteq//[^$tab]/}" # keep only the newlines
-    idnotel=$((${#idnotenls} + 2))   # to know the number of lines for editing
+    local id="$1" tabs="$2" meta metafile notenl notelines idpass
+    metafile=("$data/$id-"*.meta); meta="${metafile[0]}"
+    [[ -e "$meta" ]] || redirect "?id=$id&info=error:_logs_unknown_id:_$id"
+    idpass="${meta##*/}"; idpass="${idpass%.*}"
+    meta-read-raw "$meta"
+    notenl="${metas[note]//[^$tab]/}" # keep only the newlines
+    notelines=$((${#notenl} + 2))   # to know the number of lines for editing
 
     header "Tracker #$id" "$tabs"
+    info
     echo "<div class=container>
 <p>To insert a tracker of ID # $id in an email, insert the below code in gmail via <a href='https://addons.mozilla.org/en-US/firefox/addon/htmail/'>HTMail</a><br />(icon:
        <img src='data:image/png;base64,$htmail_logo' style='vertical-align:bottom'> at the bottom right of the mail compose window)
         <p>
-        <code class=mptcode>&lt;img src='$urlp/$id-$pass' width='1' height='1'&gt;</code>
+        <code class=mptcode>&lt;img src='$urlp/$idpass' width='1' height='1'&gt;</code>
         <p>
         <h2>Info for #$id</h2>
         <form action='?editid=$id' method=POST>
         <input type=hidden name=id value='$id'>
-        <table class=mptlog><tr><th>Name:<td><input type=text name=name size=64 value='$idname'>
-        <tr><th>Notes:<td><textarea name=note rows=$idnotel cols=71>$idnote</textarea>
+        <table class=mptlog><tr><th>Name:<td><input type=text name=name size=64 value='${metas[name]}'>
+        <tr><th>Notes:<td><textarea name=note rows=$notelines cols=64>${metas[note]//$tab/$nl}</textarea>
         <tr style='text-align:left'><td><td><input type=submit value='Modify'>
         </table></form>
         <h2>Access logs</h2>"
-    if [[ -s "$data/$id-$pass.log" ]]; then
+    if [[ -s "$data/$idpass.log" ]]; then
+        local line date hip host agent
         echo "<table class=mptlog>
         <tr><th>Date<th>IP address<th>Hostname<th>User Agent"
         # init first IP (ours) to grey color
-        rowcolor "$(head -1 "$data/$id-$pass.log" | cut -d $'\t' -f 2)"
+        rowcolor "$(head -1 "$data/$idpass.log" | cut -d $'\t' -f 2)"
 	while read -r line; do
             date=
             if [[ $line =~ ^([^$tab]+)$tab([^$tab]+)$tab([^$tab]*)$tab(.*) ]]; then
                 date="${BASH_REMATCH[1]}"
-                ip="${BASH_REMATCH[2]}"
+                hip="${BASH_REMATCH[2]}"
                 host="${BASH_REMATCH[3]}"
                 agent="${BASH_REMATCH[4]}"
             fi
             if [[ -n "$date" ]]; then
-                rowcolor "$ip"  # sets color
-                echo "<tr style='background-color:$color'><td><b>$date</b><td>$ip<td><i>$host</i><td class=useragent>$agent</small></tr>"
+                rowcolor "$hip"  # sets color
+                echo "<tr style='background-color:$color'><td><b>$date</b><td>$hip<td><i>$host</i><td class=useragent>$agent</small></tr>"
             else                # unknown format
                 echo "<tr style='background-color:$rowscolxtra'><td colspan=4>${line}"
             fi
-        done < <(tac "$data/$id-$pass.log")
+        done < <(tac "$data/$idpass.log")
         echo "</table>"
     else
 	echo "No access logs yet"
     fi
     echo "</div>"
+    echo "<form method=POST enctype='multipart/form-data' class=container>
+          You can also delete this tracker and log, if you are <b>sure</b> you have not yet used it:<p>
+          <input type=hidden name=delid value='$id'>
+          <input type=hidden name=gid value='${gid#/~}'>
+          <input class='btn' type='submit' value='Delete Tracker #$id'>
+          </table></form>"
     footer
 }
 
 ################################# Admin
 
 main-admin(){
-    local tabs="$1" i gid gpass gurl nguests=0
-    $isadmin || { echo "Location:$url$nl"; exit 0;}
+    local tabs="$1" i gid gpass gurl gnote nguests=0 admin
+    $isadmin || redirect "$url?info=error:_not_admin"
     header '' "$tabs"
-    echo "<div class=container>Guest accounts:<uL>"
+    info
+    echo "<div class=container>Guest accounts:<ul>"
     for i in *'~'*; do
         [[ $i =~ ^([[:alnum:]]+)[~]([-_.[:alnum:]]+)$ ]] || continue
         gid="${BASH_REMATCH[2]}"
         gpass="${BASH_REMATCH[1]}"
         gurl="https://$SERVER_NAME${SCRIPT_NAME%/*}/$gpass~$gid"
-        echo "<li><b>${gid}</b>: <a href='$gurl'><tt>$gurl</tt></a>"
+        [[ -e "$data/~$gid/meta" ]] || true >"$data/~$gid/meta"
+        meta-read-raw "$data/~$gid/meta"
+        gnote="${metas[note]}"
+        [[ -n "${metas[admin]}" ]] && admin=' [admin]'
+        echo "<li><a href='?mode=editguest&gid=$gid' title='Edit info of $gid'><img src='data:image/png;base64,$editicon' class=logo></a> <b>${gid}$admin</b>${gnote:+ (}$gnote${gnote:+)}: $sp$sp$sp <a href='$gurl' title='\"log in\" as $gid'><tt>$gurl</tt></a>"
         ((nguests++))
     done
     ((nguests == 0)) && echo "<i>...none...</i>"
     echo "</ul></div>"
-    echo "<form id='create-guest' method='POST' enctype='multipart/form-data' class=container>
-       <input type=text size=12 name=newguest>
-       <input class='btn' type='submit' value='Create new guest'>
-       <i>(short id: letters, numbers, hyphen, dot, underscore)</i>
-    </form>"   
+    # Section: create a new guest
+    echo "<div container>
+          <form method=POST enctype='multipart/form-data' class=container>
+          Create a new guest account:<p>
+          <table>
+          <tr><td>Name:<td><input type=text name=newguest size=12 value=''>
+          <td><i>short id: letters, numbers, hyphen, dot, underscore</i>
+          <tr><td>Note:<td colspan=2><input type=text name=note size=64 value=''> <i>Description</i>
+          <tr><td><label for=isadmin style='cursor: pointer;'>Is Admin:</label>
+          <td><input type=checkbox id=isadmin name=isadmin value=yes>
+          <td><i>Non-admins have no way to access the admin account. Admin guests have a tab to become the admin</i>
+          <tr><td colspan=3><input class='btn' type='submit' value='Create a new guest account'>
+          </table></form></div>"
+    footer
+}
+################################# Edit Guest GUI
+
+main-guest(){
+    local tabs="$1" i gid="$FORM_gid"
+    $isadmin || redirect "$url?info=error:_not_admin"
+    local meta="$data/~$gid/meta" isadmin
+    [[ -e "$meta" ]] || redirect "?mode=admin&info=error:_edit_unknown_guest_id:_$gid"
+    header '' "$tabs"
+    info
+    meta-read-raw "$meta"
+    [[ "${metas[admin]}" == true ]] && isadmin=checked
+    # Section: Edit guest
+    echo "<form method=POST enctype='multipart/form-data' class=container>
+          Edit guest account $gid:<p>
+          <input type=hidden name=savegid value='$gid'>
+          <table>
+          <tr><td>Note:<td colspan=2><input type=text name=note size=64 value='${metas[note]}'>
+          <tr><td><label for=isadmin style='cursor: pointer;'>Is Admin:</label>
+          <td><input type=checkbox id=isadmin name=isadmin value=yes $isadmin>
+          <td><i>(has a tab to go to the admin account)</i>
+          <tr><td colspan=3><input class='btn' type='submit' value='Save'>
+          </table></form>"
+    echo "<form method=POST enctype='multipart/form-data' class=container>
+          Or delete guest account $gid:<p>
+          <input type=hidden name=delgid value='$gid'>
+          <input class='btn' type='submit' value='Delete'>
+          </table></form>"
     footer
 }
 
@@ -277,59 +345,87 @@ main-admin(){
 ################################# NEW Tracker ID creation, redirects to id page
 
 create-id(){
-    local name="$1" id pass qname
+    local name="$1" id idpass
     # find next available id
     mkdir -p "$data"
     # shellcheck disable=SC2010,SC2012   # Allow ls instead of find
-    id=$(ls -1 "$data" | grep -oP '^[[:digit:]]+' | sort -nr | head -1)
-    pass=$(random_string $passlen)
+    id=$(ls -1 "$data" | grep -oP '^[[:digit:]]+(?=-.*[.]meta$)' | sort -nr | head -1)
     ((id++))
-    true >"$data/$id-$pass"
-    true >"$data/$id-$pass.log"
-    if [[ -n "$name" ]]; then
-        qname=$(html_escape "$name")
-        echo "name $qname" >>"$data/$id-$pass"
-    fi
-    echo "Location:?mode=logs&id=$id$nl"
-    exit 0
+    idpass="$id-"$(random_string $passlen)
+    true >"$data/$idpass.log"
+    metas=([name]=$(html_escape "$name") [note]=$(html_escape "$FORM_note"))
+    meta-write-raw "$data/$idpass.meta"
+    redirect "?mode=logs&id=$id&info=new_tracker_created"
 }
 
 ################################# META modification, then redirect to log page
 
-edit-id(){
-    local id="$1" name="$2" note="$3" pass qname idname idnoteq idnote rest meta
+save-id(){
+    local id="$1" name="$2" note="$3" meta metas
     # shellcheck disable=SC2010,SC2012   # Allow ls instead of find
-    pass=$(ls -1 "$data/$id-"* | grep -oPm1 -- '-\K[[:alnum:]]+')
-    meta="$data/$id-$pass"
-    idname=$(grep -soPm1 '^name +\K.*' "$meta")
-    idnoteq=$(grep -soPm1 '^note +\K.*' "$meta")
-    idnote="${idnoteq//$tab/$nl}"
-    rest=$(grep -vsE  '^(name|note) ' "$meta")
-    : >"$meta"
-    if [[ -n "$name" ]]; then
-        qname=$(html_escape "$name")
-        echo "name $qname" >>"$meta"
-    fi
-    if [[ -n "$note" ]]; then
-        qnote=$(html_escape "$note")
-        echo "note $qnote" >>"$meta"
-    fi
-    [[ -n "$rest" ]] && echo "$rest" >>"$meta"
-    echo "Location:?mode=logs&id=$id$nl"
+    metafile=("$data/$id-"*.meta); meta="${metafile[0]}"
+    [[ -e "$meta" ]] || redirect "?id=$id&info=error:_edit_unknown_id:_$id"
+    meta-read-raw "$meta"
+    metas[name]=$(html_escape "$name")
+    metas[note]=$(html_escape "$note")
+    meta-write-raw "$meta"
+    redirect "?mode=logs&id=$id&info=tracker_info_edited"
 }
 
 ################################# New guest
 
 create-guest(){
     local gid="${1//[^-_.[:alnum:]]/}" gpass
-    [[ -z "$gid" ]] && { echo "Location:?mode=admin$nl"; exit 0;} # error
+    $isadmin || redirect "$url?info=error:_not_admin" # we must be the admin
+    metas=([note]="$FORM_note")
+    [[ -n "$FORM_isadmin" ]] && metas[admin]=true || metas[admin]=false
+    [[ -z "$gid" ]] && redirect "?mode=admin&info=error:_invalid_guest_name"
     # shellcheck disable=SC2010,SC2012,SC2035   # Allow ls instead of find
     gpass=$(ls -1 *"~$gid" | grep -v '[*]' | grep -oPm1 -- '~\K[[:alnum:]]+')
-    [[ -n "$gpass" ]] && { echo "Location:?mode=admin$nl"; exit 0;} # error
+    [[ -n "$gpass" ]] && redirect "?mode=admin&info=error:_existing_guest_name"
     gpass=$(random_string $((passlen + 2)) )
-    ln -sf "$scriptname" "$gpass~$gid"
+    ln -sf "$adminpass" "$gpass~$gid"
     mkdir "$data/~$gid"
-    echo "Location:?mode=admin$nl"
+    meta-write-raw "$data/~$gid"/meta
+    redirect "?mode=admin&info=guest_${gid}_created"
+}
+
+################################# Edit guest
+
+save-guest(){
+    local gid="${1//[^-_.[:alnum:]]/}" name="$2" note="$3" admin="$4"
+    local meta="$data/~$gid/meta"
+    [[ -e "$meta" ]] || redirect "?mode=admin&info=error:_try_to_save_unknown_guest_id:_$gid"
+    metas=()
+    metas[note]="$note"
+    metas[admin]="$admin"
+    meta-write-raw "$meta"
+    redirect "?mode=admin&info=guest_${gid}_saved"
+}
+
+################################# Delete guest
+
+del-guest(){
+    local gid="${1//[^-_.[:alnum:]]/}" name="$2" note="$3" admin="$4"
+    local meta="$data/~$gid/meta" trash="$data/trashguests"
+    [[ -e "$meta" ]] || redirect "?mode=admin&info=error:_try_to_delete_unknown_guest_id:_$gid"
+    mkdir -p "$trash"/{cgi,data}
+    rm -rf "$trash/cgi/"[a-zA-Z0-9]*"~$gid" "$trash/data/~$gid"
+    mv [a-zA-Z0-9]*"~$gid" "$trash/cgi"
+    mv "$data/~$gid" "$trash/data"
+    redirect "?mode=admin&info=guest_${gid}_deleted"
+}
+
+################################# Delete id
+
+del-id(){
+    local id="${1//[^[:digit:]]/}" gid="${2//[^-_.[:alnum:]]/}"
+    local meta metafile=("$data"/"$id"-*.meta) trash="$data/trash"
+    meta="${metafile[0]}"
+    [[ -e "$meta" ]] || redirect "?&info=error:_try_to_delete_unknown_tracker_id:_$id"
+    mkdir -p "$trash"
+    mv "$data/$id-"* "$trash"
+    redirect "&info=tracker_${id}_deleted"
 }
 
 ################################# Misc utils
@@ -397,47 +493,8 @@ random_string() { # LC_ALL=C avoids unicode multibyte mess
 ############ Metadata functions
 # from: https://github.com/ColasNahaboo/colas-bash-lib
 # metadata are stored in memory as associative arrays key,values
-
-# normal metas are human friendly: key value or key: value
-# continuations lines permit newlines in values, and start with space or :
-# empty lines and comments starting with # are allowed
-# all comment lines are collapsed into the value of the '#' key
-meta-read(){
-    local file="$1"  _metaname="${2:-metas}" last_key key value _meta
-    declare -gA "$_metaname"        # ensure it is globally created as AA
-    local -n _meta="$_metaname"
-    while IFS= read -r line; do
-        (( ${#line} == 0 )) && continue
-        if [[ $line =~ ^[:[:space:]][[:space:]]*(.*)$ ]]; then
-            # If line starts with : or space, append to the last key's value
-            _meta["$last_key"]+=$'\n'"${BASH_REMATCH[1]}"
-        elif [[ "$line" =~ ^([^:[:space:]]+)[:[:space:]][[:space:]]*(.*)$ ]]; then
-            # Otherwise, split by the first colon or space
-            key="${BASH_REMATCH[1]}"
-            value="${BASH_REMATCH[2]}"
-            if [[ "$key" == '#' ]]; then # regroup all comments under key '#'
-                [[ -n "${_meta[#]}" ]] && _meta[#]+=$'\n'
-                _meta[#]+="$value"
-            else
-                _meta["$key"]="$value"
-                last_key="$key"
-            fi
-        fi
-    done <"$file"
-}
-
-meta-write(){
-    local file="$1" _meta key value
-    declare -n _meta="$2"
-    for key in "${!_meta[@]}"; do
-        value="${_meta[$key]}"
-        if [[ "$key" == '#' ]]; then
-            echo "$key ${value//$'\n'/$'\n'# }"
-        else
-            echo "$key: ${value//$'\n'/$'\n' }"
-        fi
-    done >"$file"
-}
+# shellcheck disable=SC2034
+declare -A metas
 
 # raw meta files: super efficient, but not very human friendly
 # we use the native marsdhalling of data built-in into bash: declare -p
@@ -507,19 +564,27 @@ PPprintln(){ [[ -n "$PPLOG" ]] && echo "${1@Q}" >>"$PPLOG" || echo "${1@Q}";}
 ################################# Modes dispatcher
 
 # backoffice operations
-# shellcheck disable=SC2154
+# shellcheck disable=SC2154             # FORM_xxx are defined by cgibashopts
 if [[ -n "$FORM_newid" ]] && $isadmin; then
     create-id "$FORM_newid"
 elif [[ -n "$FORM_editid" ]]; then
-    edit-id "$FORM_editid" "$FORM_name" "$FORM_note"
+    save-id "$FORM_editid" "$FORM_name" "$FORM_note"
 elif [[ -n "$FORM_newguest" ]] && $isadmin; then
     create-guest "$FORM_newguest"
+elif [[ -n "$FORM_savegid" ]] && $isadmin; then
+    save-guest "$FORM_savegid" "$FORM_name" "$FORM_note" "$FORM_isadmin"
+elif [[ -n "$FORM_delgid" ]] && $isadmin; then
+    del-guest "$FORM_delgid"
+elif [[ -n "$FORM_delid" ]]; then
+    del-id "$FORM_delid" "$FORM_gid"
 
 # GUI pages
 elif [[ "$FORM_mode" == logs ]]; then
     main-logs "${FORM_id}" trackers,logs!,admin
 elif [[ "$FORM_mode" == admin ]]; then
     main-admin trackers,admin!
+elif [[ "$FORM_mode" == editguest ]]; then
+    main-guest trackers,admin,guest!
 else
     main trackers!,admin     # mode == trackers
 fi

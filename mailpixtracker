@@ -175,7 +175,7 @@ redirect(){
 
 ################################# MAIN (trackers) mode
 
-main(){
+gui-trackers(){
     local tabs="$1" idpass id idpass idname last # idpass=NN-nnpass
     header '' "$tabs"
     info
@@ -212,9 +212,25 @@ main(){
     footer
 }
 
+############ NEW Tracker ID creation, redirects to id page
+
+create-id(){
+    local name="$1" note="$2" id idpass
+    # find next available id
+    mkdir -p "$data"
+    # shellcheck disable=SC2010,SC2012   # Allow ls instead of find
+    id=$(ls -1 "$data" | grep -oP '^[[:digit:]]+(?=-.*[.]meta$)' | sort -nr | head -1)
+    ((id++))
+    idpass="$id-"$(random_string $passlen)
+    true >"$data/$idpass.log"
+    metas=([name]=$(html_escape "$name") [note]=$(html_escape "$note"))
+    meta-write-raw "$data/$idpass.meta"
+    redirect "?mode=logs&id=$id&info=new_tracker_created"
+}
+
 ################################# Logs of ID, and other info
 
-main-logs(){
+gui-logs(){
     local id="$1" tabs="$2" meta metafile notenl notelines idpass
     metafile=("$data/$id-"*.meta); meta="${metafile[0]}"
     [[ -e "$meta" ]] || redirect "?id=$id&info=error:_logs_unknown_id:_$id"
@@ -274,9 +290,35 @@ main-logs(){
     footer
 }
 
+########### META modification, then redirect to log page
+
+save-id(){
+    local id="$1" name="$2" note="$3" meta metas
+    # shellcheck disable=SC2010,SC2012   # Allow ls instead of find
+    metafile=("$data/$id-"*.meta); meta="${metafile[0]}"
+    [[ -e "$meta" ]] || redirect "?id=$id&info=error:_edit_unknown_id:_$id"
+    meta-read-raw "$meta"
+    metas[name]=$(html_escape "$name")
+    metas[note]=$(html_escape "$note")
+    meta-write-raw "$meta"
+    redirect "?mode=logs&id=$id&info=tracker_info_edited"
+}
+
+########### Delete id
+
+del-id(){
+    local id="${1//[^[:digit:]]/}" gid="${2//[^-_.[:alnum:]]/}"
+    local meta metafile=("$data"/"$id"-*.meta) trash="$data/trash"
+    meta="${metafile[0]}"
+    [[ -e "$meta" ]] || redirect "?info=error:_try_to_delete_unknown_tracker_id:_$id"
+    mkdir -p "$trash"
+    mv "$data/$id-"* "$trash"
+    redirect "?mode=trackers&info=tracker_${id}_deleted"
+}
+
 ################################# Admin
 
-main-admin(){
+gui-admin(){
     local tabs="$1" i gid gpass gurl gnote nguests=0 admin
     $isadmin || redirect "$url?info=error:_not_admin"
     header '' "$tabs"
@@ -311,9 +353,28 @@ main-admin(){
           </table></form></div>"
     footer
 }
+
+########### New guest
+
+create-guest(){
+    local gid="${1//[^-_.[:alnum:]]/}" gpass
+    $isadmin || redirect "$url?info=error:_not_admin" # we must be the admin
+    metas=([note]="$FORM_note")
+    [[ -n "$FORM_isadmin" ]] && metas[admin]=true || metas[admin]=false
+    [[ -z "$gid" ]] && redirect "?mode=admin&info=error:_invalid_guest_name"
+    # shellcheck disable=SC2010,SC2012,SC2035   # Allow ls instead of find
+    gpass=$(ls -1 *"~$gid" | grep -v '[*]' | grep -oPm1 -- '~\K[[:alnum:]]+')
+    [[ -n "$gpass" ]] && redirect "?mode=admin&info=error:_existing_guest_name"
+    gpass=$(random_string $((passlen + 2)) )
+    ln -sf "$adminpass" "$gpass~$gid"
+    mkdir "$data/~$gid"
+    meta-write-raw "$data/~$gid"/meta
+    redirect "?mode=admin&info=guest_${gid}_created"
+}
+
 ################################# Edit Guest GUI
 
-main-guest(){
+gui-guest(){
     local tabs="$1" i gid="$FORM_gid"
     $isadmin || redirect "$url?info=error:_not_admin"
     local meta="$data/~$gid/meta" isadmin
@@ -341,57 +402,7 @@ main-guest(){
     footer
 }
 
-################################# Backoffice: non-GUI functions
-
-################################# NEW Tracker ID creation, redirects to id page
-
-create-id(){
-    local name="$1" note="$2" id idpass
-    # find next available id
-    mkdir -p "$data"
-    # shellcheck disable=SC2010,SC2012   # Allow ls instead of find
-    id=$(ls -1 "$data" | grep -oP '^[[:digit:]]+(?=-.*[.]meta$)' | sort -nr | head -1)
-    ((id++))
-    idpass="$id-"$(random_string $passlen)
-    true >"$data/$idpass.log"
-    metas=([name]=$(html_escape "$name") [note]=$(html_escape "$note"))
-    meta-write-raw "$data/$idpass.meta"
-    redirect "?mode=logs&id=$id&info=new_tracker_created"
-}
-
-################################# META modification, then redirect to log page
-
-save-id(){
-    local id="$1" name="$2" note="$3" meta metas
-    # shellcheck disable=SC2010,SC2012   # Allow ls instead of find
-    metafile=("$data/$id-"*.meta); meta="${metafile[0]}"
-    [[ -e "$meta" ]] || redirect "?id=$id&info=error:_edit_unknown_id:_$id"
-    meta-read-raw "$meta"
-    metas[name]=$(html_escape "$name")
-    metas[note]=$(html_escape "$note")
-    meta-write-raw "$meta"
-    redirect "?mode=logs&id=$id&info=tracker_info_edited"
-}
-
-################################# New guest
-
-create-guest(){
-    local gid="${1//[^-_.[:alnum:]]/}" gpass
-    $isadmin || redirect "$url?info=error:_not_admin" # we must be the admin
-    metas=([note]="$FORM_note")
-    [[ -n "$FORM_isadmin" ]] && metas[admin]=true || metas[admin]=false
-    [[ -z "$gid" ]] && redirect "?mode=admin&info=error:_invalid_guest_name"
-    # shellcheck disable=SC2010,SC2012,SC2035   # Allow ls instead of find
-    gpass=$(ls -1 *"~$gid" | grep -v '[*]' | grep -oPm1 -- '~\K[[:alnum:]]+')
-    [[ -n "$gpass" ]] && redirect "?mode=admin&info=error:_existing_guest_name"
-    gpass=$(random_string $((passlen + 2)) )
-    ln -sf "$adminpass" "$gpass~$gid"
-    mkdir "$data/~$gid"
-    meta-write-raw "$data/~$gid"/meta
-    redirect "?mode=admin&info=guest_${gid}_created"
-}
-
-################################# Edit guest
+########### Edit guest
 
 save-guest(){
     local gid="${1//[^-_.[:alnum:]]/}" name="$2" note="$3" admin="$4"
@@ -404,7 +415,7 @@ save-guest(){
     redirect "?mode=admin&info=guest_${gid}_saved"
 }
 
-################################# Delete guest
+########### Delete guest
 
 del-guest(){
     local gid="${1//[^-_.[:alnum:]]/}" name="$2" note="$3" admin="$4"
@@ -417,20 +428,9 @@ del-guest(){
     redirect "?mode=admin&info=guest_${gid}_deleted"
 }
 
-################################# Delete id
-
-del-id(){
-    local id="${1//[^[:digit:]]/}" gid="${2//[^-_.[:alnum:]]/}"
-    local meta metafile=("$data"/"$id"-*.meta) trash="$data/trash"
-    meta="${metafile[0]}"
-    [[ -e "$meta" ]] || redirect "?info=error:_try_to_delete_unknown_tracker_id:_$id"
-    mkdir -p "$trash"
-    mv "$data/$id-"* "$trash"
-    redirect "?mode=trackers&info=tracker_${id}_deleted"
-}
-
 ################################# Misc utils
 
+############ unique colors of rows
 # sets the color global var to the color of the row, caches in rowkeys[ip]
 rowkey=0                        # static index to current rowscol[] to use
 rowcolor(){
@@ -477,19 +477,6 @@ rowscol[19]='hsl(137.5, 60%, 95%)'
 rowscol[20]='hsl(  0, 60%, 95%)'
 rowscolxtra='#eee'
 rowscolmax=20
-
-# quotes text for inclusion, and replace nl by tab for textarea contents
-html_escape() {
-    local s="$1"
-    s=${s//&/\&amp;}; s=${s//</\&lt;}; s=${s//>/\&gt;}
-    s=${s//\"/\&quot;}; s=${s//\'/\&#39;}; s="${s//$nl/$tab}"
-    printf '%s' "$s"
-}
-
-# returns a random alphanumeric string of N chars, non-nl-terminated
-random_string() { # LC_ALL=C avoids unicode multibyte mess
-    LC_ALL=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c "${1:-12}"
-}
 
 ############ Metadata functions
 # from: https://github.com/ColasNahaboo/colas-bash-lib
@@ -562,9 +549,24 @@ PParray() {
 PPprint(){ [[ -n "$PPLOG" ]] && echo -n " ${1@Q}" >>"$PPLOG" || echo -n " ${1@Q}";}
 PPprintln(){ [[ -n "$PPLOG" ]] && echo "${1@Q}" >>"$PPLOG" || echo "${1@Q}";}
 
-################################# Modes dispatcher
+############ misc
 
-# backoffice operations
+# quotes text for inclusion, and replace nl by tab for textarea contents
+html_escape() {
+    local s="$1"
+    s=${s//&/\&amp;}; s=${s//</\&lt;}; s=${s//>/\&gt;}
+    s=${s//\"/\&quot;}; s=${s//\'/\&#39;}; s="${s//$nl/$tab}"
+    printf '%s' "$s"
+}
+
+# returns a random alphanumeric string of N chars, non-nl-terminated
+random_string() { # LC_ALL=C avoids unicode multibyte mess
+    LC_ALL=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c "${1:-12}"
+}
+
+################################# Main logic dispatcher
+
+# backoffice operations called from GUI pages
 # shellcheck disable=SC2154             # FORM_xxx are defined by cgibashopts
 if [[ -n "$FORM_newid" ]] && $isadmin; then
     create-id "$FORM_name" "$FORM_note"
@@ -579,13 +581,13 @@ elif [[ -n "$FORM_delgid" ]] && $isadmin; then
 elif [[ -n "$FORM_delid" ]]; then
     del-id "$FORM_delid" "$FORM_gid"
 
-# GUI pages
+# frontoffice GUI pages, each in a tab of the nav bar
 elif [[ "$FORM_mode" == logs ]]; then
-    main-logs "${FORM_id}" trackers,logs!,admin
+    gui-logs "${FORM_id}" trackers,logs!,admin
 elif [[ "$FORM_mode" == admin ]]; then
-    main-admin trackers,admin!
+    gui-admin trackers,admin!
 elif [[ "$FORM_mode" == editguest ]]; then
-    main-guest trackers,admin,guest!
+    gui-guest trackers,admin,guest!
 else
-    main trackers!,admin     # mode == trackers
+    gui-trackers trackers!,admin     # mode == trackers
 fi

@@ -1,6 +1,6 @@
 # Mail Pix Tracker
 
-<img src="doc/mpt3-576.png" align="right" width="200" height="200">This is a simple bash script to track emails via an invisible pixel, for my personal use.
+This is a simple bash script to track emails via an invisible pixel, for my personal use.
 
 - Just two shell scripts: `mailpixtracker` here, and  [cgibashopts](https://github.com/ColasNahaboo/cgibashopts)
 - Only needs any web server able to execute [CGI](https://en.wikipedia.org/wiki/Common_Gateway_Interface) scripts

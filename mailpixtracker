@@ -1,89 +1,385 @@
 #!/bin/bash
-# Mail Pix(el) Tracker
-# https://github.com/ColasNahaboo/mailpixtracker
-# (c) 2025 Colas Nahaboo
-# License: GPL v3
-export VERSION=2.2.2
+# shellcheck disable=SC2155,SC1090
+export VERSION=3.0.0
+export PROGNAME='Mail Pix Tracker'
+export source='https://github.com/ColasNahaboo/mailpixtracker'
+export copyright='(c)2026 Colas Nahaboo, MIT License'
+export PPLOG=/tmp/mpt.log       # can be used for debugging with PP functions
 
-# parameters of the request
-# url/mailpixtracker            # main menu
-# url/mailpixtracker/new        # create a new tracker id
-# url/mailpixtracker/id/NN      # provide code for id NN, and display access logs
-# url/mailpixtracker/pix/NN     # log an access from email with tracker of id NN
+###################### CSS Style
 
-# script is called by https://my.host.org/cgi-bin/mailpixtracker/command/id
+export style='
+/*============================================== Common & Vars */
+:root {
+    --bg: #fcfcfc; --sidebar-bg: #f0f2f5; --text: #24292f;
+    --dim: #6e7781; --ip: #0969da; --path: #bc4c00;
+    --border: #d0d7de; --highlight: #fff8c5;
+}
+
+body {
+    background: var(--bg); color: var(--text);
+    font-family: Proxima Nova, system-ui, -apple-system, sans-serif;
+    margin: 0; font-size: 14px;
+}
+
+.container { margin: 0 auto; padding: 20px; }
+.minicontainer { padding: 10px 20px; }
+
+pre, code, .log-line, .mptcode {
+    font-family: "SFMono-Regular", Consolas, monospace; font-size: 13px;
+}
+
+/* Headings: Grouped by shared traits */
+h1, h2, h3, h4, h5, h6 { font-weight: normal; margin: 10px 0 5px; }
+h1 { font-size: 170%; } h2 { font-size: 145%; } h3 { font-size: 130%; }
+h4, h5, h6 { font-weight: bold; }
+h4 { font-size: 120%; } h5 { font-size: 110%; } h6 { font-size: 95%; }
+
+/* Sticky Header */
+.header {
+    position: sticky; top: 0; z-index: 1000;
+    background: rgba(252, 252, 252, 0.9); backdrop-filter: blur(5px);
+    border-bottom: 1px solid var(--border); padding: 15px 20px;
+    display: flex; justify-content: space-between; align-items: center;
+}
+
+/* Buttons */
+.btn, .btn2 {
+    padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border);
+    background: #fff; color: var(--ip); text-decoration: none; font-weight: 500;
+}
+.btn:hover { background: #f6f8fa; }
+.btn2 { background: #afa; } .btn2:hover { background: #8f8; }
+
+/* Status Blocks */
+.resultok, .resultfail { padding: 16px; border-left: 4px solid; }
+.resultok { background: #f0fff0; border-left-color: green; }
+.resultfail { background: #fff0f0; border-left-color: red; }
+
+/*============================================== Navigation */
+.main-header {
+    display: flex; align-items: baseline; padding: 10px 20px;
+    background: #f8f9fa; border-bottom: 1px solid #ddd;
+}
+
+.brand { font-weight: bold; font-size: 1.2em; }
+.brand a { text-decoration: none; color: inherit; }
+
+/* Merged the two .nav-tabs blocks into one */
+.nav-tabs a {
+    margin-left: 20px; padding: 5px 10px; text-decoration: none;
+    color: var(--ip); background: #eee; border: 1px solid #ccc;
+    border-bottom: none; border-radius: 5px 5px 0 0;
+}
+
+.nav-tabs a.active {
+    pointer-events: none; cursor: default; color: #333;
+    border-bottom: 2px solid var(--ip); font-weight: bold;
+}
+
+/* Tables & Logs */
+table { width: 100%; border-collapse: collapse; background: #fff; }
+th, td { text-align: left; padding: 8px 12px; border: 1px solid #e1e4e8; }
+
+.log-line {
+    padding: 4px 12px; border-left: 3px solid #aaa;
+    border-bottom: 1px solid #f0f0f0; white-space: pre-wrap;
+}
+.log-line:nth-child(even) { background: #f0f0ff; }
+.log-line:nth-child(odd)  { background: #fafaff; }
+.log-line:hover { background: var(--highlight); border-left-color: var(--ip); }
+
+/* MailPixTracker Specifics */
+table.mptlog td { padding: 0.1rem 0.4rem; }
+.useragent { font-size: small; color: var(--dim); }
+.mptlog .new { background: yellow; }
+code.mptcode { background: #ffffdd; }
+'
+
+# from a 32x32 png image with tranparent bg, via: base64 -w 0 imagefile.png
+logo='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'
+
+htmail_logo='iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAMAAADzapwJAAAAAXNSR0IB2cksfwAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAgFQTFRFAAAAAAAAREdGREdGREdGREdGREdGRklIRUhHREdGRklIU1ZVS05NWVxbS05NRklIVFdWXmFgRklISUxLc3V0XV9eW11dTlFQRUhHTlFQXV9fWFtaUFNSR0pJSUxLS05NRklIV1lZS05NRklITE9OoqOiZ2loTE9ORklIRUhHTE9OV1pZRklITE5OTVBPR0pJSUxLWFpaSEtKSEtKVVhXTU9ORUhHUVRTZWdmTE9OREdGRklIT1JRUFJRRklIRUhHTE9OXmFgdHd2SEtKR0pJd3p5U1VUS05Nd3p5SEtKTE9Ob3FwRUhHTlFQUVRTRklIRklIW15dU1VVSEtKSEtKT1JRSk1MRklIVVhXV1pZSk1MRklITE9OXmFgSUxLRUhHRklIS05Nam1sWFtaR0pJSEtKUFJRSEtKRUhHSEtKUlVUTlFQR0pJTVBPRUhHTU9OTU9PRUhHRkhHS05NaGtqWFtaS05NSUxLSEtKR0lIZmdnTE9OR0pJVFdW0NHRiIqJcHNySk1M6OjoYmVkUFNSRklITE9OUlVUWVxbSUxLR0pJR0pJSEtKhIaFUlVUSUxLRklITE5OTU9OTlBPSEtKRUhHY2VkTE9OSEtKSk1MVVhXVFZVSk1MTE5NUlVUSUxLTVBPZGZlTU9OR0pJYWRjeXp5UFNSSUxLRUhHSEtKTE9OQSeK0AAAAAF0Uk5TAEDm2GYAAAABYktHRACIBR1IAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAB3RJTUUH6QsZBDAYbH3PlwAAAGpJREFUGNOtkTESgEAIAzNpQm/NJ+53/l4d9eDktJJyJwlMADgZgCrQRNBQZpcfjm/sc6wndl1iecJKGeq4eVrnHiEaxLFyAdYIernbArebNWNVy86uhk56bUevltwJk+ruAdc//ILnL94Az6AE8m6Sfn0AAAAASUVORK5CYII='
+
+###################### Common
+
 ROOT_URL="$REQUEST_SCHEME://$HTTP_HOST"
-name="${SCRIPT_NAME##*/}"       # the name of the script, can be anything
+scriptname="${SCRIPT_NAME##*/}" # adminpass or guestpass~guestid
 url="$ROOT_URL$SCRIPT_NAME"     # its URL
-params="$PATH_INFO"             # arguments of the request
+urlp="$ROOT_URL/_"              # URL of pixel logger mini-script
+data=$(realpath '../data')      # metadata, logs, caches, guest ids...
 nl=$'\n';  tab=$'\t'            # some useful constants
-# shellcheck disable=SC2034     # don't warn when L is unused
-L=/tmp/mailpixtracker.log       # debuging by echo "..." >>$L
-
-# you can redefine the location of the optional config files via env variables
-# global for all names
-if [[ -n "$MAILPIXTRACKER_GLOBALCONF" ]]; then gconfig="$MAILPIXTRACKER_GLOBALCONF"
-else gconfig="mpt.conf"
-fi
-# only for this script name
-if [[ -n "$MAILPIXTRACKER_CONF" ]]; then config="$MAILPIXTRACKER_CONF"
-else config="$name.conf"
-fi
-#############################################################################
-# config vars, can be redefined in config file mailpixtracker.conf
-export TZ=                      # timezone used for dates in logs
-export dir=.                    # where to store logs and cached data
+# true ISO is YYYY-MM-DDTHH:MN:SS, but we use more readbale: YYYY-MM-DD.HHhMN,SS
 export dateformat='%Y-%m-%d.%Hh%M,%S' # format of dates in logs.
-                                # true ISO:  YYYY-MM-DDTHH:MN:SS
-                                # default more readble: YYYY-MM-DD.HHhMN,SS
-# optional HTML code included in header
-export style=""
-# optional header code at start of html body
-export header=
-# optional footer code at end of html body
-export footer="<hr><a href='https://github.com/ColasNahaboo/mailpixtracker'>mailpixtracker</a> v$VERSION"
-# built-in styling is regrouped here, keeping it is recommended.
-export mptstyle="table.mptlog td {padding: 0.1rem 0.4rem}
-table.mptlog td.useragent {font-size:small; color:#888888}
-table.mptlog td.new {background-color:yellow}
-code.mptcode {font-size: large; background-color:#ffffdd}
-input,textarea {padding: 0.2rem 0.2rem}
-h1 {font-size:1.6rem}
-h2 {font-size:1.3rem}
-"
-#############################################################################
+passlen=8                # length of the random "passwords", 10^14 combinations
 
-# load config files if present as a bash script to redefine the above vars
-# shellcheck disable=SC1090 # Ok to not check included file syntax
-[[ -e "$gconfig" ]] && . "$gconfig"
-# shellcheck disable=SC1090
-[[ -e "$config" ]] && . "$config"
-
-################################# TRACK: provide a 1x1 pixel, log the ID access
-# first, handle the tracker notifications as fast as possible
-
-if [[ $params =~ /pix/([[:digit:]]+)$ ]]; then
-    mkdir -p "$dir/$name-log"
-    id="${BASH_REMATCH[1]}"
-    date=$(date +"$dateformat")
-    clienthost=$(host "$REMOTE_ADDR")
-    clientname=
-    [[ $clienthost =~ 'domain name pointer '(.+)[.]$ ]] && clientname="${BASH_REMATCH[1]}"
-    # old v1 format was:
-    # echo "$date [$REMOTE_ADDR] ($clientname) - $HTTP_USER_AGENT" >>"$dir/$name-log/$id"
-    echo "$date${tab}$REMOTE_ADDR${tab}$clientname${tab}$HTTP_USER_AGENT" >>"$dir/$name-log/$id"
-    echo "Content-Type:image/png$nl"
-    [[ -e "$dir/$name-1px.png" ]] || # cache 1x1 transparent pixel PNG if needed
-        mkdir -p "$dir"
-	base64 -d <<<'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==' >"$dir/$name-1px.png"
-    cat "$dir/$name-1px.png"
-    exit 0
-fi
-
-################################# REST
-# We can now take our time, parse the args...
 # shellcheck disable=SC1091 # Ok to not check included file syntax
 . cgibashopts
+err() { echo "***ERROR: $*" >&2; exit 1; }
+version="<p class=version><a href='$source'>${source##*/}</a> v$VERSION, $copyright</p>"
+if [[ $SCRIPT_NAME =~ /([[:alnum:]]+)([~][-_.[:alnum:]]+)$ ]]; then
+    gid="/${BASH_REMATCH[2]}"       # guest id, in the form "/~guestid"
+    isadmin=false
+    data="$data$gid"
+    urlp="$urlp$gid"
+else
+    gid=                            # admin
+    isadmin=true
+fi
+
+# args: subtitle comma-separated-tabs (active one postfixed by !)
+header(){
+    local title="${PROGNAME}${1:+: }${1}" tabs=",$2," guestlabel titlelabel
+    if ! $isadmin; then
+        guestlabel=" <span class=guest>[${gid#*~}]</span>"
+        titlelabel=" [${gid#*~}]"
+    fi
+    echo "Content-Type: text/html$nl$nl<html><head>
+<link rel=icon type='image/png' sizes='32x32' href='data:image/png;base64,$logo'>
+<style>$style</style><title>$title$titlelabel</title>
+</head><body><header class='main-header'>
+<div class='brand'><a href='$url'><img class=logo src='data:image/png;base64,$logo'> $title$guestlabel</a></div><nav class='nav-tabs'>"
+    [[ $tabs =~ ,trackers(!)?, ]] &&
+        echo "<a href='$url' class='tab${BASH_REMATCH[1]:+ active}'>Trackers</a>"
+    [[ $tabs =~ ,logs(!)?, ]] &&
+        echo "<a href='$url?mode=logs&id=$id' class='tab${BASH_REMATCH[1]:+ active}'>Tracker #$id</a>"
+    [[ $tabs =~ ,admin(!)?, ]] && $isadmin &&
+        echo "<a href='$url?mode=admin' class='tab${BASH_REMATCH[1]:+ active}'>Admin</a>"
+    echo "</nav></header>"
+}
+is-active(){
+    [[ "$1" == "$2" ]] && echo " active"
+}
+footer(){
+    echo "<hr><div class=minicontainer>$version</div></body></html>"
+}
+
+################################# Frontoffice: GUI functions
+
+################################# MAIN mode
+
+main(){
+    local tabs="$1" idpass id pass idname last # idpass=NN-nnpass
+    header '' "$tabs"
+    # Section: create a new tracker
+    echo "<div class=minicontainer>"
+    echo "<form method=POST enctype='multipart/form-data' class=container>
+          <ul><li>Create a new tracker to insert in emails named:
+          <input type=text name=newid size=48 value=''>
+          <input type=submit value='Create'></form>"
+    # Section: list existing trackers
+    if [[ -d "$data" ]]; then
+        echo "<li>Show logs for existing trackers:<ul>"
+        # shellcheck disable=SC2010,SC2012   # Allow ls instead of find
+        while read -r idpass; do
+            id="${idpass%%-*}"
+            pass="${idpass#*-}"
+            if [[ -e "$data/$idpass" ]]; then
+                last=$(tail -1 "$data/$idpass.log" 2>/dev/null | cut -f 1 -d ' ')
+                idname=$(grep -soPm1 '^name +\K.*' "$data/$idpass")
+                [[ -n "$idname" ]] && idname=" <b>$idname</b>"
+                echo "<li><a href='?mode=logs&id=$id'>#$id</a>$idname"
+                if [[ -n "$last" ]]; then
+                    echo ", last log on $last</li>"
+                else
+                    echo " <span class=guest>(no access logs yet)</span>"
+                fi                  
+            fi
+        done < <(ls -1 "$data" | grep -oP '^[[:digit:]]+-[[:alnum:]]+$' | sort -nr)
+        echo "</ul></form>"
+    fi
+    echo "</ul>"
+    footer
+}
+
+################################# Logs of ID, and other info
+
+main-logs(){
+    local id="$1" tabs="$2" pass idname idnoteq idnote idnotenls idnotel
+    # shellcheck disable=SC2010,SC2012   # Allow ls instead of find
+    pass=$(ls -1 "$data/$id-"* | grep -oPm1 -- '-\K[[:alnum:]]+')
+    idname=$(grep -soPm1 '^name +\K.*' "$data/$id-$pass")
+    idnoteq=$(grep -soPm1 '^note +\K.*' "$data/$id-$pass")
+    idnote="${idnoteq//$tab/$nl}"
+    idnotenls="${idnoteq//[^$tab]/}" # keep only the newlines
+    idnotel=$((${#idnotenls} + 2))   # to know the number of lines for editing
+
+    header "Tracker #$id" "$tabs"
+    echo "<div class=container>
+<p>To insert a tracker of ID # $id in an email, insert the below code in gmail via <a href='https://addons.mozilla.org/en-US/firefox/addon/htmail/'>HTMail</a><br />(icon:
+       <img src='data:image/png;base64,$htmail_logo' style='vertical-align:bottom'> at the bottom right of the mail compose window)
+        <p>
+        <code class=mptcode>&lt;img src='$urlp/$id-$pass' width='1' height='1'&gt;</code>
+        <p>
+        <h2>Info for #$id</h2>
+        <form action='?editid=$id' method=POST>
+        <input type=hidden name=id value='$id'>
+        <table class=mptlog><tr><th>Name:<td><input type=text name=name size=64 value='$idname'>
+        <tr><th>Notes:<td><textarea name=note rows=$idnotel cols=71>$idnote</textarea>
+        <tr style='text-align:left'><td><td><input type=submit value='Modify'>
+        </table></form>
+        <h2>Access logs</h2>"
+    if [[ -s "$data/$id-$pass.log" ]]; then
+        echo "<table class=mptlog>
+        <tr><th>Date<th>IP address<th>Hostname<th>User Agent"
+        # init first IP (ours) to grey color
+        rowcolor "$(head -1 "$data/$id-$pass.log" | cut -d $'\t' -f 2)"
+	while read -r line; do
+            date=
+            if [[ $line =~ ^([^$tab]+)$tab([^$tab]+)$tab([^$tab]*)$tab(.*) ]]; then
+                date="${BASH_REMATCH[1]}"
+                ip="${BASH_REMATCH[2]}"
+                host="${BASH_REMATCH[3]}"
+                agent="${BASH_REMATCH[4]}"
+            fi
+            if [[ -n "$date" ]]; then
+                rowcolor "$ip"  # sets color
+                echo "<tr style='background-color:$color'><td><b>$date</b><td>$ip<td><i>$host</i><td class=useragent>$agent</small></tr>"
+            else                # unknown format
+                echo "<tr style='background-color:$rowscolxtra'><td colspan=4>${line}"
+            fi
+        done < <(tac "$data/$id-$pass.log")
+        echo "</table>"
+    else
+	echo "No access logs yet"
+    fi
+    echo "</div>"
+    footer
+}
+
+################################# Admin
+
+main-admin(){
+    local tabs="$1" i gid gpass gurl nguests=0
+    $isadmin || { echo "Location:$url$nl"; exit 0;}
+    header '' "$tabs"
+    echo "<div class=container>Guest accounts:<uL>"
+    for i in *'~'*; do
+        [[ $i =~ ^([[:alnum:]]+)[~]([-_.[:alnum:]]+)$ ]] || continue
+        gid="${BASH_REMATCH[2]}"
+        gpass="${BASH_REMATCH[1]}"
+        gurl="https://$SERVER_NAME${SCRIPT_NAME%/*}/$gpass~$gid"
+        echo "<li><b>${gid}</b>: <a href='$gurl'><tt>$gurl</tt></a>"
+        ((nguests++))
+    done
+    ((nguests == 0)) && echo "<i>...none...</i>"
+    echo "</ul></div>"
+    echo "<form id='create-guest' method='POST' enctype='multipart/form-data' class=container>
+       <input type=text size=12 name=newguest>
+       <input class='btn' type='submit' value='Create new guest'>
+       <i>(short id: letters, numbers, hyphen, dot, underscore)</i>
+    </form>"   
+    footer
+}
+
+################################# Backoffice: non-GUI functions
+
+################################# NEW Tracker ID creation, redirects to id page
+
+create-id(){
+    local name="$1" id pass qname
+    # find next available id
+    mkdir -p "$data"
+    # shellcheck disable=SC2010,SC2012   # Allow ls instead of find
+    id=$(ls -1 "$data" | grep -oP '^[[:digit:]]+' | sort -nr | head -1)
+    pass=$(random_string $passlen)
+    ((id++))
+    true >"$data/$id-$pass"
+    true >"$data/$id-$pass.log"
+    if [[ -n "$name" ]]; then
+        qname=$(html_escape "$name")
+        echo "name $qname" >>"$data/$id-$pass"
+    fi
+    echo "Location:?mode=logs&id=$id$nl"
+    exit 0
+}
+
+################################# META modification, then redirect to log page
+
+edit-id(){
+    local id="$1" name="$2" note="$3" pass qname idname idnoteq idnote rest meta
+    # shellcheck disable=SC2010,SC2012   # Allow ls instead of find
+    pass=$(ls -1 "$data/$id-"* | grep -oPm1 -- '-\K[[:alnum:]]+')
+    meta="$data/$id-$pass"
+    idname=$(grep -soPm1 '^name +\K.*' "$meta")
+    idnoteq=$(grep -soPm1 '^note +\K.*' "$meta")
+    idnote="${idnoteq//$tab/$nl}"
+    rest=$(grep -vsE  '^(name|note) ' "$meta")
+    : >"$meta"
+    if [[ -n "$name" ]]; then
+        qname=$(html_escape "$name")
+        echo "name $qname" >>"$meta"
+    fi
+    if [[ -n "$note" ]]; then
+        qnote=$(html_escape "$note")
+        echo "note $qnote" >>"$meta"
+    fi
+    [[ -n "$rest" ]] && echo "$rest" >>"$meta"
+    echo "Location:?mode=logs&id=$id$nl"
+}
+
+################################# New guest
+
+create-guest(){
+    local gid="${1//[^-_.[:alnum:]]/}" gpass
+    [[ -z "$gid" ]] && { echo "Location:?mode=admin$nl"; exit 0;} # error
+    # shellcheck disable=SC2010,SC2012,SC2035   # Allow ls instead of find
+    gpass=$(ls -1 *"~$gid" | grep -v '[*]' | grep -oPm1 -- '~\K[[:alnum:]]+')
+    [[ -n "$gpass" ]] && { echo "Location:?mode=admin$nl"; exit 0;} # error
+    gpass=$(random_string $((passlen + 2)) )
+    ln -sf "$scriptname" "$gpass~$gid"
+    mkdir "$data/~$gid"
+    echo "Location:?mode=admin$nl"
+}
+
+################################# Misc utils
+
+# sets the color global var to the color of the row, caches in rowkeys[ip]
+rowkey=0                        # static index to current rowscol[] to use
+rowcolor(){
+    local ip="$1"
+    color="${rowkeys[$1]}"
+    if [[ -n "$color" ]]; then  # cached
+        return
+    elif ((rowkey > rowscolmax)); then # overflow, just loop avoiding firt one
+        color="${rowscol[1]}"
+        rowkey=2
+        rowkeys[$ip]="$color"
+    else                        # allocate next color from the predefined ones
+        color="${rowscol[$rowkey]}"
+        ((rowkey++))
+        rowkeys[$ip]="$color"
+    fi
+}
+# static vars for rowcolor()
+# a map[ipadress] = color
+declare -A rowkeys
+# To maximize perceptual spacing, I used golden-angle hue sampling
+# (137.508° steps), a well-known approximation of greedy max-min spacing
+# to allow distinct colors to distinct IPs
+rowscol[0]='#f7f7f7'
+rowscol[1]='hsl( 92.5, 60%, 95%)'
+rowscol[2]='hsl(315.0, 60%, 95%)'
+rowscol[3]='hsl(177.5, 60%, 95%)'
+rowscol[4]='hsl( 40.0, 60%, 95%)'
+rowscol[5]='hsl(262.5, 60%, 95%)'
+rowscol[6]='hsl(125.0, 60%, 95%)'
+rowscol[7]='hsl(347.5, 60%, 95%)'
+rowscol[8]='hsl(210.0, 60%, 95%)'
+rowscol[9]='hsl( 72.5, 60%, 95%)'
+rowscol[10]='hsl(295.0, 60%, 95%)'
+rowscol[11]='hsl(157.5, 60%, 95%)'
+rowscol[12]='hsl( 20.0, 60%, 95%)'
+rowscol[13]='hsl(242.5, 60%, 95%)'
+rowscol[14]='hsl(105.0, 60%, 95%)'
+rowscol[15]='hsl(327.5, 60%, 95%)'
+rowscol[16]='hsl(190.0, 60%, 95%)'
+rowscol[17]='hsl( 52.5, 60%, 95%)'
+rowscol[18]='hsl(275.0, 60%, 95%)'
+rowscol[19]='hsl(137.5, 60%, 95%)'
+rowscol[20]='hsl(  0, 60%, 95%)'
+rowscolxtra='#eee'
+rowscolmax=20
 
 # quotes text for inclusion, and replace nl by tab for textarea contents
 html_escape() {
@@ -93,182 +389,137 @@ html_escape() {
     printf '%s' "$s"
 }
 
-################################# MAIN menu
-if [[ -z "$params" ]]; then
-    title="Mail Pixel Tracker"
-    echo "Content-Type:text/html$nl"
-    echo "<!doctype html><head>$style<style>$mptstyle</style><title>$title</title></head><body>$header"
-    echo "<h1>$title</h1>
-          <form action='$url/new' method=POST>
-          <ul><li>Create a new tracker to insert in emails named:
-          <input type=text name=name size=48 value=''>
-          <input type=submit value='Create'>"
-    if [[ -d "$dir/$name-log" ]]; then
-        echo "<li>Show logs for existing trackers:<ul>"
-        # shellcheck disable=SC2010,SC2012   # Allow ls instead of find
-        while read -r id; do
-            if [[ -s "$dir/$name-log/$id" ]]; then
-                last=$(tail -1 "$dir/$name-log/$id" | cut -f 1 -d ' ')
-                idname=$(grep -soPm1 '^name +\K.*' "$dir/$name-log/$id.meta")
-                [[ -n "$idname" ]] && idname=" <b>$idname</b>"
-                echo "<li><a href='$url/id/$id'>$id</a>$idname, last log on $last</li>"
-            fi
-        done < <(ls -1 "$dir/$name-log" | grep -Ex '[[:digit:]]+' | sort -nr)
-        echo "</ul></form>"
-    fi
-    echo "</ul>$footer</body>"
-    exit 0
-fi
+# returns a random alphanumeric string of N chars, non-nl-terminated
+random_string() { # LC_ALL=C avoids unicode multibyte mess
+    LC_ALL=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c "${1:-12}"
+}
 
-################################# NEW ID creation, then redirect to log page
+############ Metadata functions
+# from: https://github.com/ColasNahaboo/colas-bash-lib
+# metadata are stored in memory as associative arrays key,values
 
-if [[ "$params" = /new ]]; then
-    # find next available id
-    # shellcheck disable=SC2010,SC2012   # Allow ls instead of find
-    id=$(ls -1 "$dir/$name-log" | grep -Ex '[[:digit:]]+' | sort -nr | head -1)
-    ((id++))
-    mkdir -p "$dir"
-    true >"$dir/$name-log/$id"
-    true >"$dir/$name-log/$id.meta"
-    if [[ -n "$FORM_name" ]]; then
-        qname=$(html_escape "$FORM_name")
-        echo "name $qname" >>"$dir/$name-log/$id.meta"
-    fi
-    echo "Location:$url/id/$id$nl"
-    exit 0
-fi
-
-################################# META modification, then redirect to log page
-
-if [[ "$params" = /meta ]]; then
-    # shellcheck disable=SC2154 # $FORM_id is defined elsewhere
-    id="$FORM_id"
-    rest=$(grep -vsE  '^(name|note) ' "$dir/$name-log/$id.meta")
-    rm -f "$dir/$name-log/$id.meta"
-    if [[ -n "$FORM_name" ]]; then
-        qname=$(html_escape "$FORM_name")
-        echo "name $qname" >>"$dir/$name-log/$id.meta"
-    fi
-    if [[ -n "$FORM_note" ]]; then
-        qnote=$(html_escape "$FORM_note")
-        echo "note $qnote" >>"$dir/$name-log/$id.meta"
-    fi
-    [[ -n "$rest" ]] && echo "$rest" >>"$dir/$name-log/$id.meta"
-    echo "Location:$url/id/$id$nl"
-    exit 0
-fi
-
-################################# LOG: shows the log for an ID
-
-if [[ $params =~ /id/([[:digit:]]+)$ ]]; then
-    id="${BASH_REMATCH[1]}"
-    idname=$(grep -soPm1 '^name +\K.*' "$dir/$name-log/$id.meta")
-    idnamef=; [[ -n "$idname" ]] && idnamef=", $idname"
-    idnoteq=$(grep -soPm1 '^note +\K.*' "$dir/$name-log/$id.meta")
-    idnote="${idnoteq//$tab/$nl}"
-    idnotenls="${idnoteq//[^$tab]/}"
-    idnotel=$((${#idnotenls} + 2)) # number of notes lines
-    title="Mail Pixel Tracker #$id$idnamef"
-    mkdir -p "$dir"
-    echo "Content-Type:text/html
-
-<!doctype html><head>$style<style>$mptstyle</style><title>$title</title></head><body>$header
-       <a href='$url'>[Main Menu]</a><br>
-       <h1>$title</h1>
-       <p>To insert a tracker of ID # $id in an email, insert the below code in gmail via <a href='https://addons.mozilla.org/en-US/firefox/addon/htmail/'>HTMail</a><br />(icon:
-       <img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAMAAADzapwJAAAAAXNSR0IB2cksfwAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAgFQTFRFAAAAAAAAREdGREdGREdGREdGREdGRklIRUhHREdGRklIU1ZVS05NWVxbS05NRklIVFdWXmFgRklISUxLc3V0XV9eW11dTlFQRUhHTlFQXV9fWFtaUFNSR0pJSUxLS05NRklIV1lZS05NRklITE9OoqOiZ2loTE9ORklIRUhHTE9OV1pZRklITE5OTVBPR0pJSUxLWFpaSEtKSEtKVVhXTU9ORUhHUVRTZWdmTE9OREdGRklIT1JRUFJRRklIRUhHTE9OXmFgdHd2SEtKR0pJd3p5U1VUS05Nd3p5SEtKTE9Ob3FwRUhHTlFQUVRTRklIRklIW15dU1VVSEtKSEtKT1JRSk1MRklIVVhXV1pZSk1MRklITE9OXmFgSUxLRUhHRklIS05Nam1sWFtaR0pJSEtKUFJRSEtKRUhHSEtKUlVUTlFQR0pJTVBPRUhHTU9OTU9PRUhHRkhHS05NaGtqWFtaS05NSUxLSEtKR0lIZmdnTE9OR0pJVFdW0NHRiIqJcHNySk1M6OjoYmVkUFNSRklITE9OUlVUWVxbSUxLR0pJR0pJSEtKhIaFUlVUSUxLRklITE5OTU9OTlBPSEtKRUhHY2VkTE9OSEtKSk1MVVhXVFZVSk1MTE5NUlVUSUxLTVBPZGZlTU9OR0pJYWRjeXp5UFNSSUxLRUhHSEtKTE9OQSeK0AAAAAF0Uk5TAEDm2GYAAAABYktHRACIBR1IAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAB3RJTUUH6QsZBDAYbH3PlwAAAGpJREFUGNOtkTESgEAIAzNpQm/NJ+53/l4d9eDktJJyJwlMADgZgCrQRNBQZpcfjm/sc6wndl1iecJKGeq4eVrnHiEaxLFyAdYIernbArebNWNVy86uhk56bUevltwJk+ruAdc//ILnL94Az6AE8m6Sfn0AAAAASUVORK5CYII='> at the bottom right of the mail compose window)
-        <p>
-        <code class=mptcode>&lt;img src='$url/pix/$id' width='1' height='1'&gt;</code>
-        <p>
-        <h2>Info for #$id</h2>
-        <form action='$url/meta' method=POST>
-        <input type=hidden name=id value='$id'>
-        <table class=mptlog><tr><th>Name:<td><input type=text name=name size=64 value='$idname'>
-        <tr><th>Notes:<td><textarea name=note rows=$idnotel cols=71>$idnote</textarea>
-        <tr style='text-align:left'><td><td><input type=submit value='Modify'>
-        </table></form>
-        <h2>Access logs</h2>"
-    if [[ -s "$dir/$name-log/$id" ]]; then
-        echo "<table class=mptlog>
-        <tr><th>#<th>Date+Time<th>IP address<th>Hostname<th>User Agent"
-        # To maximize perceptual spacing, I used golden-angle hue sampling
-        # (137.508° steps), a well-known approximation of greedy max-min spacing
-        # to allow distinct colors to distinct IPs
-        colors[0]='#f7f7f7'
-        colors[1]='hsl( 92.5, 60%, 95%)'
-        colors[2]='hsl(315.0, 60%, 95%)'
-        colors[3]='hsl(177.5, 60%, 95%)'
-        colors[4]='hsl( 40.0, 60%, 95%)'
-        colors[5]='hsl(262.5, 60%, 95%)'
-        colors[6]='hsl(125.0, 60%, 95%)'
-        colors[7]='hsl(347.5, 60%, 95%)'
-        colors[8]='hsl(210.0, 60%, 95%)'
-        colors[9]='hsl( 72.5, 60%, 95%)'
-        colors[10]='hsl(295.0, 60%, 95%)'
-        colors[11]='hsl(157.5, 60%, 95%)'
-        colors[12]='hsl( 20.0, 60%, 95%)'
-        colors[13]='hsl(242.5, 60%, 95%)'
-        colors[14]='hsl(105.0, 60%, 95%)'
-        colors[15]='hsl(327.5, 60%, 95%)'
-        colors[16]='hsl(190.0, 60%, 95%)'
-        colors[17]='hsl( 52.5, 60%, 95%)'
-        colors[18]='hsl(275.0, 60%, 95%)'
-        colors[19]='hsl(137.5, 60%, 95%)'
-        colors[20]='hsl(  0, 60%, 95%)'
-        color_unknown='#eee'
-        # we parse the list of all mentioned ips, to use as indexes in colors[]
-        ipx=0
-        declare -A ips
-        while read -r line; do
-            if [[ $line =~ ^[^$tab]+$tab([^$tab]+) ]]; then # v2 format
-                ipk=_"${BASH_REMATCH[1]//./_}"
-            elif [[ $line =~ \[([.[:digit:]]+)\] ]]; then # v1 format
-                ipk=_"${BASH_REMATCH[1]//./_}"
+# normal metas are human friendly: key value or key: value
+# continuations lines permit newlines in values, and start with space or :
+# empty lines and comments starting with # are allowed
+# all comment lines are collapsed into the value of the '#' key
+meta-read(){
+    local file="$1"  _metaname="${2:-metas}" last_key key value _meta
+    declare -gA "$_metaname"        # ensure it is globally created as AA
+    local -n _meta="$_metaname"
+    while IFS= read -r line; do
+        (( ${#line} == 0 )) && continue
+        if [[ $line =~ ^[:[:space:]][[:space:]]*(.*)$ ]]; then
+            # If line starts with : or space, append to the last key's value
+            _meta["$last_key"]+=$'\n'"${BASH_REMATCH[1]}"
+        elif [[ "$line" =~ ^([^:[:space:]]+)[:[:space:]][[:space:]]*(.*)$ ]]; then
+            # Otherwise, split by the first colon or space
+            key="${BASH_REMATCH[1]}"
+            value="${BASH_REMATCH[2]}"
+            if [[ "$key" == '#' ]]; then # regroup all comments under key '#'
+                [[ -n "${_meta[#]}" ]] && _meta[#]+=$'\n'
+                _meta[#]+="$value"
             else
-                continue
+                _meta["$key"]="$value"
+                last_key="$key"
             fi
-            if [[ -z "${ips[$ipk]}" ]]; then
-                # shellcheck disable=SC2004 # ip is not a numeric index
-                ips[$ipk]="$ipx"
-                ((ipx++))
-            fi
-        done <"$dir/$name-log/$id"
-        lastseen=$(date -r "$dir/$name-log/$id.meta" +"$dateformat" 2>/dev/null)
-	while read -r line; do
-            date=
-            # v2 format line
-            if [[ $line =~ ^([^$tab]+)$tab([^$tab]+)$tab([^$tab]*)$tab(.*) ]]; then
-                date="${BASH_REMATCH[1]}"
-                ip="${BASH_REMATCH[2]}"
-                host="${BASH_REMATCH[3]}"
-                agent="${BASH_REMATCH[4]}"
-            # v1 format line
-            elif [[ $line =~ ^(.+)\ \[([.[:digit:]]+)\]\ [(]([^\)]*)[)]\ -\ (.*) ]]; then
-                date="${BASH_REMATCH[1]}"
-                ip="${BASH_REMATCH[2]}"
-                host="${BASH_REMATCH[3]}"
-                agent="${BASH_REMATCH[4]}"
-            fi
-            if [[ -n "$date" ]]; then
-                ipk="_${ip//./_}"
-                ipx="${ips[$ipk]}"
-                color="${colors[$ipx]}"
-                isnew=old; [[ "$date" > "$lastseen" ]] && isnew=new
-                echo "<tr style='background-color:$color'><td class='$isnew idx'>$ipx<td><b>$date</b><td>$ip<td><i>$host</i><td class=useragent>$agent</small></tr>"
-            else                # unknown format
-                echo "<tr style='background-color:$color_unknown'><td><td colspan=4>${line}"
-            fi
-        done < <(tac "$dir/$name-log/$id")
-        echo "</table>"
-    else
-	echo "No access logs yet"
+        fi
+    done <"$file"
+}
+
+meta-write(){
+    local file="$1" _meta key value
+    declare -n _meta="$2"
+    for key in "${!_meta[@]}"; do
+        value="${_meta[$key]}"
+        if [[ "$key" == '#' ]]; then
+            echo "$key ${value//$'\n'/$'\n'# }"
+        else
+            echo "$key: ${value//$'\n'/$'\n' }"
+        fi
+    done >"$file"
+}
+
+# raw meta files: super efficient, but not very human friendly
+# we use the native marsdhalling of data built-in into bash: declare -p
+# reads metadata from "raw" file $1, info array named $2" (defaults to "metas")
+# the metadata file is a declaration of a global associative array named metas
+meta-read-raw(){
+    local file="$1" metaname="$2"
+    if [[ -n "$metaname" ]]; then
+        # To rename the arra, swap the name in a temporary file and source it
+        local tmp="/tmp/meta-raw.$$"
+        sed "1s/^declare -Ag metas=/declare -Ag $metaname=/" "$file" > "$tmp"
+        source "$tmp"
+        rm "$tmp"
+    else                        # default name is faster
+        source "$file"
     fi
-    echo "$footer</body>"
-    touch "$dir/$name-log/$id.meta"
-    exit 0
+}
+
+# $1=file $2=metadata array name, default  "metas"
+# We need to force the declaration to have global scope (with "g" option
+# Otherwise sourcing the file inside a function will not work
+meta-write-raw(){
+    local file="$1" name="${2:-metas}"
+    declare -p "$name" |
+        sed "1s/^declare -A $name=/declare -Ag metas=/" >"$file"
+}
+
+
+############ PP print-debugging
+# Crude debugging: prints args to logfile "$PPLOG", that can be empty for stdout
+# If arg is -t, switch to trace mode:  args as variable names printed as var=val
+# -v (defaut) reset prints mode to normal. PPT defaults to -t.
+PP(){
+    local _arg _mode _info
+    for _arg in "$@"; do
+        case "$_arg" in
+            '-t') _mode=t; continue;;
+            '-v') _mode=v; continue;;
+        esac
+        if [[ "$_mode" == t ]]; then
+            if [[ ! -v "$_arg" ]]; then
+                echo -n " $_arg:UNSET"
+            else
+                _info=$(declare -p "$_arg" 2>/dev/null)
+                case "$_info" in
+                    "declare -[aA]"*) PParray "$_arg";;
+                    *) PPprint "$_arg=${!_arg@Q}";;
+                esac
+            fi
+        else
+            PPprint "${_arg@Q}"
+        fi
+    done
+    PPprintln ''
+}
+PPT(){ PP -t "$@";}
+PParray() {
+    local -n _array=$1  # Creates a reference to the array name passed
+    local _key
+    for _key in "${!_array[@]}"; do
+        echo -n " $1[$_key]=${_array[$_key]}"
+    done
+}
+PPprint(){ [[ -n "$PPLOG" ]] && echo -n " ${1@Q}" >>"$PPLOG" || echo -n " ${1@Q}";}
+PPprintln(){ [[ -n "$PPLOG" ]] && echo "${1@Q}" >>"$PPLOG" || echo "${1@Q}";}
+
+################################# Modes dispatcher
+
+# backoffice operations
+# shellcheck disable=SC2154
+if [[ -n "$FORM_newid" ]] && $isadmin; then
+    create-id "$FORM_newid"
+elif [[ -n "$FORM_editid" ]]; then
+    edit-id "$FORM_editid" "$FORM_name" "$FORM_note"
+elif [[ -n "$FORM_newguest" ]] && $isadmin; then
+    create-guest "$FORM_newguest"
+
+# GUI pages
+elif [[ "$FORM_mode" == logs ]]; then
+    main-logs "${FORM_id}" trackers,logs!,admin
+elif [[ "$FORM_mode" == admin ]]; then
+    main-admin trackers,admin!
+else
+    main trackers!,admin     # mode == trackers
 fi
-
-################################# DEFAULT: unknown param ==> main menu
-
-echo "Location:$url$nl"
-exit 0

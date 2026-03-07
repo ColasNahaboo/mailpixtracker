@@ -1,0 +1,30 @@
+#!/bin/bash
+# source: 'https://github.com/ColasNahaboo/mailpixtracker'
+################################# TRACKER: provide a 1x1 pixel, logs the access
+
+nl=$'\n';  tab=$'\t'            # some useful constants
+dateformat='%Y-%m-%d.%Hh%M,%S' # format of dates in logs.
+pixel=../data/1px.png
+# cache 1x1 transparent pixel PNG if needed
+[[ -e "$pixel" ]] ||
+    base64 -d <<<'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==' >"$pixel"
+
+# Then log only if the url was a valid one:
+# mpturl/_/NN-nnpass or mpturl/_/~guestid/NN-nnpass
+if [[ $PATH_INFO =~ (/[~][[:alnum:]]+)?/[[:digit:]]+-[[:alnum:]]+$ ]]; then
+    meta=../data"$PATH_INFO"
+    # log only if metafile exists: was properly created by the admin GUI
+    if [[ -e "$meta" ]]; then
+        date=$(date +"$dateformat")
+        clienthost=$(host "$REMOTE_ADDR")
+        clientname=
+        [[ $clienthost =~ 'domain name pointer '(.+)[.]$ ]] &&
+            clientname="${BASH_REMATCH[1]}"
+        echo "$date${tab}$REMOTE_ADDR${tab}$clientname${tab}$HTTP_USER_AGENT" >>"$meta".log
+    fi
+fi
+
+# Always return the 1x pixel to avoid triggering a broken image on client
+echo "Content-Type:image/png$nl"
+cat "$pixel"
+exit 0

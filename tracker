@@ -2,14 +2,14 @@
 # source: 'https://github.com/ColasNahaboo/mailpixtracker'
 ################################# TRACKER: provide a 1x1 pixel, logs the access
 
-nl=$'\n';  tab=$'\t'            # some useful constants
-dateformat='%Y-%m-%d.%Hh%M,%S' # format of dates in logs.
+nl=$'\n';  tab=$'\t'           # some useful constants
+dateformat='%Y-%m-%d.%Hh%M,%S' # dates format in logs. ISO-ish but readable 
 pixel=../data/p.png
 # cache 1x1 transparent pixel PNG if needed
 [[ -e "$pixel" ]] ||
     base64 -d <<<'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==' >"$pixel"
 
-# Then log only if the url was a valid one:
+# Then log only if the url was for a valid and active tracker:
 # mpturl/_/NN-nnpass or mpturl/_/~guestid/NN-nnpass
 if [[ $PATH_INFO =~ (/[~][[:alnum:]]+)?/[[:digit:]]+-[[:alnum:]]+$ ]]; then
     meta=../data"$PATH_INFO".meta

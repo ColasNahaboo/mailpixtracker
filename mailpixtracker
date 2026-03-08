@@ -4,9 +4,10 @@ export VERSION=3.0.0
 export PROGNAME='Mail Pix Tracker'
 export source='https://github.com/ColasNahaboo/mailpixtracker'
 export copyright='(c)2026 Colas Nahaboo, MIT License'
-# export PPLOG=/tmp/mpt.log       # can be used for debugging with PP functions
+# export PPLOG=/tmp/log       # can be used for debugging with PP functions
 
-# globals
+# globals. Can be redefined in the sourced file ../mailpixtracker.conf
+configfile='../mailpixtracker.conf'
 passlen=8                # length of the random "passwords", 10^14 combinations
 declare -g root_url adminpass url urlp data nl tab sp date gid isadmin isgadmin
 
@@ -212,7 +213,6 @@ save-id(){
     metafile=("$data/$id-"*.meta); meta="${metafile[0]}"
     [[ -e "$meta" ]] || redirect "?id=$id&info=error:_edit_unknown_id:_$id"
     meta-read-raw "$meta"
-    PPT id name note metas
     metas[name]=$(html_escape "$name")
     metas[note]=$(html_escape "$note")
     meta-write-raw "$meta"
@@ -598,6 +598,7 @@ editicon='iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IB2cksfwAAAARnQU
 # shellcheck disable=SC1091 # Ok to not check included file syntax
 . cgibashopts
 init
+[[ -e "$configfile" ]] && . "$configfile"
 
 # backoffice operations called from GUI pages
 # shellcheck disable=SC2154             # FORM_xxx are defined by cgibashopts

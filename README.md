@@ -39,15 +39,15 @@ Note that the tracking is not foolproof. Most mailers nowadays prompt the user b
 
 ## Example
 
-The main Admin UI
+The main Admin UI. It lists the created trackers (but no the ones of the guests), and allow to create new ones.
 
 ![](doc/screen-main.png)
 
-Logs of one tracker (more recent first)
+Logs of one tracker (more recent first). Each IP adress has an unique color. Your own adress (used when composing the email) is always in dim grey. You can change the tracker name and description, and delete it.
 
 ![](doc/screen-logs.png)
 
-Admin panel
+Admin panel, listing the guest accounts and enabling creating one.
 
 ![](doc/screen-admin.png)
 

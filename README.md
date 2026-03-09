@@ -1,15 +1,25 @@
 # Mail Pix Tracker
 
-<img src="doc/mpt3-576.png" align="right" width="200" height="200">Mailpixtracker is a simple bash script to track emails via an invisible pixel, for my personal use.
+<img src="doc/mpt3-576.png" align="right" width="200" height="200">Mailpixtracker is a lightweight, privacy-focused Bash CGI script designed to track email opens via an invisible 1x1 pixel. Think of [MailTracker](https://www.getmailtracker.com/) or [MailTrack](https://mailtrack.email/) or [MailSuite](https://mailsuite.com/), but for basic personal use, without all the marketing tools.
 
-- Just two shell scripts: `mailpixtracker` here, and  [cgibashopts](https://github.com/ColasNahaboo/cgibashopts)
+- Just three shell scripts: `mailpixtracker` and `tracker` here, and  [cgibashopts](https://github.com/ColasNahaboo/cgibashopts)
 - Only needs any web server able to execute [CGI](https://en.wikipedia.org/wiki/Common_Gateway_Interface) scripts
 - It generates for you a simple HTML line to include in your emails
+- Simple security via [Capability URLs](https://www.w3.org/TR/capability-urls/) intead of accounts with logins and passwords
+- Data is kept as plain files, no databases
+- It is privately self-hosted: everything is on your own server, nothing is handled by a third party.
+- The main account can create guests accounts — by just giving them a link — that can use the system without being able to use or see the files of other accounts. Guests do not have a way to find the main admin account, unless specifically declared admins
 
-Note that the tracking is not foolproof. Most mailers nowadays prompt the user before loading images.
+Note that the tracking is not foolproof. Most mailers nowadays prompt the user before loading images. So people could have read your emails without triggering the tracker.
 
-## Usage
-- Go to the script URL on your web server.<br>E.g: `https://my.server.org/cgi-bin/mailpixtracker`
+## Prerequisites
+
+* **Web Server**: Apache or any web server with CGI support
+* **Linux system with GNU utilities**: Debian, Ubuntu, ... systems where `date --version` shows "GNU". Bash must be at least version 4.2.
+* **cgibashopts**: A file that must be copied in the same directory as mailpixtracker. Get it from here: [cgibashopts](https://github.com/ColasNahaboo/cgibashopts/blob/main/cgibashopts)
+
+## Usage Summary
+- Go to the script URL on your web server.<br>E.g: `https://my.mailpixtracker.org/gZu2SpMbpJ`
 - Create a new tracker. You will need one separate tracker (with a unique ID number) for each email, to track each email in a separate log. You can optionally add a meaningful name.
 - Mailpixtracker will then show you the log page for the tracker. You can edit its name and various notes at any time.
 - When composing your email, copy/paste into it the yellow highlighted HTML line at the top of the log page, via your installed browser extension or email software.
@@ -19,76 +29,110 @@ Note that the tracking is not foolproof. Most mailers nowadays prompt the user b
 - New log entries added since last time the log was viewed have a yellow rectangle at their left side.
 - The Notes field is a convenient way to store details about the sent email for this tracker ID, as well as remembering which timestamps correspond to specific events. Use it!
 
+### Guest accounts
+
+- The admin account can create new trackers, manage guest accounts, and view all system logs. But by default he only sees his onw trackers, to avoid confusion. To manage guest trackers, he must go to a guest account via the "Amdin" tab.
+- Admin can create Guest accounts. Guests access a restricted dashboard via a unique URL: `https://my.mailpixtracker.org/guestpassword~guestname`
+  The guest password is randomly generated and assigned, but the admin can choose meaningful guest names.
+- The admin then just communicate to the guest his URL, and by using it he cannot get to the admin account, except if the account was created with the "admin" option set, in which case the guest will have an "admin" tab linking to the admin account
+- Non-admin guests can only see and manage trackers they have created.
+
 ## Example
 
-The log page for the tracker of ID #17 and its access logs:
+The main Admin UI
 
-![](screenshot1.png)
+![](doc/screen-main.png)
 
-## Installation
+Logs of one tracker (more recent first)
 
-- Just copy the bash script `mailpixtracker` into any cgi-enabled directory on your web server, and also the [cgibashopts](https://github.com/ColasNahaboo/cgibashopts) script
-- You can rename the "mailpixtracker" file as you want, e.g to "a-name-hard-to-guess". Since there are no access control, choosing a hard to guess name will act as a protection, or you can protect the access via directives of your web server, but its more complex (see "Access Control" below). <br>E.g. `https://my.server.org/cgi-bin/a-name-hard-to-guess`
+![](doc/screen-logs.png)
+
+Admin panel
+
+![](doc/screen-admin.png)
+
+## Installation & Directory Structure
+
+First, you need to decide on an admin password: a random alphanumeric string that will be the installed name of the script and should not be guessable. You can you run `doc/random-string.sh` to get suggestions. In the rest of this doc, we will use `gZu2SpMbpJ`
+
+Mailpixtracker expects the following layout. The `cgi` folder should be your web-visible directory (e.g., `DocumentRoot`), while `data` and the configuration file stay one level above (protected).
+
+```text
+/www/mpt/
+├── data/                 # Writable by www-data (logs and metadata)
+├── mailpixtracker.conf   # Global configuration (optional)
+└── cgi/                  # The Web Root
+    ├── gZu2SpMbpJ        # mailpixtracker, but renamed as your admin "password"
+    ├── _                 # tracker script, renamed as underscore
+    └── cgibashopts       # bash library used by mailpixtracker
+
+```
+
+The `data` directory must be writable by the web server user:
+
+```bash
+# as root:
+mkdir -p /www/mpt/{cgi,data}
+chown -R www-data:www-data /www/mpt/
+
+```
+
+See an example of an Apache VirtualHost configuration: [doc/apache-sample.conf](doc/apache-sample.conf). If you use another server, just ask your favorite AI to translate this configuration file for your specific server.
+Note how you can redirect in it `https://my.mailpixtracker.org/` to the admin account form some IP adresses you consider secure, so that admins do not have to remember/store the admin password.
+
+**Configuration**: Not much, but you can customize your setup in `../mailpixtracker.conf`. You can redefine variables like `passlen` or execute any bash code of your choice
+
+```bash
+# Example mailpixtracker.conf
+passlen=12
+
+```
+
+- Copy the bash scripts `mailpixtracker` and `tracker` into the `/www/mpt/cgi` directory on your web server, and also the [cgibashopts](https://github.com/ColasNahaboo/cgibashopts) script
+- Rename there `mailpixtracker` as your admin password, e.g. `gZu2SpMbpJ`
+- Rename `tracker` as `_`
 - If using a webmail, I recommend installing a browser extension to allow easy inclusion of the generated tracker HTML code in your emails. For GMail, you can use the HTMail extension for [Firefox](https://addons.mozilla.org/en-US/firefox/addon/htmail/) or [Chrome](https://chromewebstore.google.com/detail/htmail-insert-html-into-g/omojcahabhafmagldeheegggbakefhlh?hl=en).
-- Requirements: 
-  - any web server able to execute [CGI](https://en.wikipedia.org/wiki/Common_Gateway_Interface) scripts
-  - linux, or some linux-compatible environement (e.g. cygwin on windows)
-  - bash at least version 4 (see $BASH_VERSION). V4 was released in 2010.
-  - Some common linux utilities: [tac](https://man7.org/linux/man-pages/man1/tac.1.html), [base64](https://man7.org/linux/man-pages/man1/base64.1.html), [cut](https://man7.org/linux/man-pages/man1/cut.1.html)
 
-## Configuration
+### Data structure and Implementation
 
-In the same directory where you put the mailtracker script, you can add a config file with the same name but with .conf appended. E.g: "my-mpt.conf"
-If you do not want a non-cgi script in this dir, you can set the name of the config file to load as the environment variable `MAILPIXTRACKER_CONF` in your web server configuration.
-
-This script will be interpreted as a bash script, so you can redefine global variables:
-- `TZ` timezone used for dates in logs. Default: the server timezone.
-- `dir` where to store logs and cached data. Default is ".", th directory where the script is run.
-- `dateformat` the format of the linux command "date" to format the timestamp. The default is '%Y-%m-%d.%Hh%M,%S', which gives times like 2025-11-18.13h41,38 for a better readability, but you can use the true ISO format by setting `dateformat='%Y-%m-%dT%H:%M:%S'`<br>Warning: formats must ensure their alphabetical order obey the chronological order: YYYY-MM-DD is OK, but not MM/DD/YYYY.
-- `style` optional HTML code included in header. Default is a minimal style. You can embed CSS code or link an external stylesheet, e.g:
-  - `style='<style>h1 {font-family:arial;}</style>'`
-  - `style='<link rel="stylesheet" href="..." />'`
-- `header` optional HTML header code included at the start of the html body. Default is empty.
-- `footer` optional HTML footer code included at the end of the html body.<br>Default is `<hr><a href='https://github.com/ColasNahaboo/mailpixtracker'>`
-
-Example:
+```text
+/www/mpt/
+├── mailpixtracker.conf     # Global configuration (optional)
+├── cgi/                    # The Web Root
+│   ├── gZu2SpMbpJ          # mailpixtracker, renamed as your admin "password"
+│   ├── _                   # tracker script, renamed as underscore
+│   ├── cgibashopts         # bash library used by mailpixtracker
+│   ├── 9FwQ1rnIhD~Anna     # symlink to gZu2SpMbpJ. Anna's guest account
+│   └── PZdn7Lz7a7~Bob      # symlink to gZu2SpMbpJ. Bob's guest account
+└── data/                   # Writable by www-data (logs and metadata)
+    ├── trash/              # "deleted" trackers and accounts are moved there
+    ├── 12~I5rHJCFap.log    # access logs for tracker #12
+    ├── 12~I5rHJCFap.meta   # metadata (name, note, ...) for tracker #12
+    ├── ~Anna/              # account and trackers info for Anna
+    │   ├── meta            # metadata of the Anna account (notes, is-admin)
+    │   ├── 3~ciyImp7C.log  # access logs for tracker #3 of Anna
+    │   ├── 3~ciyImp7C.meta # metadata for tracker #3 of Anna
+    └── ~Bob/               # account and trackers info for Bob
 
 ```
-TZ=CET
-dir=/var/tmp/mailpixtracker
-dateformat='%Y-%m-%dT%H:%M:%S'
-style='<style>html {font-family: verdana,arial,geneva,helvetica,sans-serif;}</style>'
-```
 
-Note that by default, mailpixtracker will create some files and a directory (all starting by the same name as the script itself) in the installation directory. You can change this via the `dir` config variable.
+Metadata — bash Associatrive Arrays — are stored in "bash native" format via `declare -p` via the embedded functions of `metadata.sh` of my collection of bash snippets [colas-bash-lib](https://github.com/ColasNahaboo/colas-bash-lib)
 
-If you want to implement access control to the script in your server, be aware that access to the `pix/NN` sub-urlshould always be enabled for all.<br>
-E.g. access to `https://my.server.org/cgi-bin/mailpixtracker` may be restricted, but all accesses to `https://my.server.org/cgi-bin/mailpixtracker/pix/NN` should be allowed.
-
-### Access Control
-If you want to allow other users to use your mailpixtracker installation, I recommend generating a unique name for the script for them to use by creating a symbolic link to your mailpixtracker file, so you can remove their access simply by removing the symbolic link and associated files. `pwgen` is a handy utility to generate unique names.<br>
-E.g: `cd /my-server-cgi-directory; ln -s a-name-hard-to-guess ciefahnaiteiQu6a`<br>
-Thus you can tell them to use `https://my.server.org/cgi-bin/ciefahnaiteiQu6a`<br>
-And to remove their access: `rm /my-server-cgi-directory/ciefahnaiteiQu6a*`
+Logs are lines of 4 tab-separated values: date, ip-adress, adress-name, user-agent.
 
 ## License: GPL V3 (c) 2025 Colas Nahaboo
 
 [GitHub Source repository](https://github.com/ColasNahaboo/mailpixtracker)
 
-## Technical details
-
-Files auto-created in `dir` (default is the same cgi-bin directory where mailpixtracker has been installed):
-
-- `mailpixtracker-1pix.png` caches the transparent 1-pixel image used as a tracker in emails
-- `mailpixtracker-log/NN` the log (one entry per line) of access to the tracker for id `NN`, tab-separated values of timestamp,ip,hostname,useragent
-- `mailpixtracker-log/NN.meta` optionally, the metadata for the log of id `NN`, as key-space-values format one per line, with possible keys:
-  - `name` the user-friendly name of the tracker, html-escaped.
-  - `note` notes for this tracker, html-escaped and newlines escaped as tabs for a multi-line otes text to fit on a single metadata line
-  
-If you want to remove the logs for a tracker `NN`, just remove `mailpixtracker-log/NN` and `mailpixtracker-log/NN.meta` on your server.
-
 ## History
 
+- v3.0.0 2027-03-09 Version 3 introduces:
+  - a robust multi-user (Guest) system
+  - a cleaner, more modern UI
+  - code refactoring, and data reorganisation for a cleaner separation between the web-accessible scripts and private tracking data
+  - consistent security via unguessable [Capability URLs](https://www.w3.org/TR/capability-urls/)
+  - a separate minimal tracker script for the actual pixel logging
+  - Warning: v3 is **incompatible** with v2, an installation from scratch is recommended 
 - v2.2.2 2025-12-07 IP adress index number shown in left column of logs
 - v2.2.1 2025-11-27 optional global mpt.conf for all names, env var MAILPIXTRACKER_GLOBALCONF
 - v2.2.0 2025-11-25 new log entries signaled.

@@ -4,7 +4,6 @@ export VERSION=3.0.0
 export PROGNAME='Mail Pix Tracker'
 export source='https://github.com/ColasNahaboo/mailpixtracker'
 export copyright='(c)2026 Colas Nahaboo, MIT License'
-# export PPLOG=/tmp/log       # can be used for debugging with PP functions
 
 # globals. Can be redefined in the sourced file ../mailpixtracker.conf
 configfile='../mailpixtracker.conf'
@@ -101,12 +100,13 @@ gui-trackers(){
             idpass="${meta##*/}"; idpass="${idpass%.*}"
             id="${idpass%%-*}"
             last=$(tail -1 "${meta%.*}.log" 2>/dev/null | cut -f 1 -d $'\t')
+            last="${last%% [*}" # backcompat with v1 log format
             meta-read-raw "$meta"
             idname=
             [[ -n "${metas[name]}" ]] && idname=" <b>${metas[name]}</b>"
             echo -n "<li><a href='?mode=logs&id=$id' title='See logs of #$id'>#$id</a>$sp$sp$sp$idname"
             if [[ -n "$last" ]]; then
-                echo ", last log on $last"
+                echo "${idname:+, }last log on $last"
             else
                 echo " <span class=guest>(no access logs yet)</span>"
             fi                  
@@ -179,6 +179,12 @@ gui-logs(){
 	while read -r line; do
             date=
             if [[ $line =~ ^([^$tab]+)$tab([^$tab]+)$tab([^$tab]*)$tab(.*) ]]; then
+                date="${BASH_REMATCH[1]}"
+                hip="${BASH_REMATCH[2]}"
+                host="${BASH_REMATCH[3]}"
+                agent="${BASH_REMATCH[4]}"
+            # legacy v1 format line for backcompat
+            elif [[ $line =~ ^(.+)\ \[([.[:digit:]]+)\]\ [(]([^\)]*)[)]\ -\ (.*) ]]; then
                 date="${BASH_REMATCH[1]}"
                 hip="${BASH_REMATCH[2]}"
                 host="${BASH_REMATCH[3]}"
@@ -429,60 +435,6 @@ meta-write-raw(){
 
 # to clear the metadata
 meta-reset(){ local _m="${2:-metas}"; unset "$_m"; declare -Ag "$_m";}
-
-############ PP print-debugging
-# Crude debugging: prints args to logfile "$PPLOG", (empty = stdout)
-# If arg is -t, switch to trace mode: args as variable names printed as var=val
-# -v (defaut) reset prints mode to normal. PPT is a shortcut to PP -t.
-PP(){
-    local _arg _mode _info _sep
-    local -
-    for _arg in "$@"; do
-        case "$_arg" in
-            '-t') _mode=t; continue;;
-            '-v') _mode=v; continue;;
-        esac
-        PPV "$_sep"
-        if [[ "$_mode" == t ]]; then
-            local __desc=$(declare -p "$_arg" 2>/dev/null)
-            if [[ -z "$__desc" ]]; then
-                PPV "$_arg!"
-            else
-                local __attr=$(echo "$__desc" | cut -d' ' -f2 | sed 's/-//')
-                # If no flag was found, it's a scalar
-                case "$__attr" in
-                    A) PPV "$_arg=("; PPAA "$_arg"; PPV ')';;
-                    a) PPV "$_arg=("; PPIA "$_arg"; PPV ')';;
-                    *) PPV "$_arg="; PPQ "${!_arg}";;
-                esac
-            fi
-        else
-            PPQ "$_arg"
-        fi
-        _sep=' '
-    done
-    PPN ''
-}
-PPT(){ PP -t "$@";}
-# various elementary prints: Associative and Indexed Arrays, Quoted
-PPAA() {
-    local -n _array=$1  # Creates a reference to the array name passed
-    local _key
-    for _key in "${!_array[@]}"; do
-        PPV "[$_key]="; PPQ "${_array[$_key]}"; PPV ' '
-    done
-}
-PPIA() {
-    local -n _array=$1  # Creates a reference to the array name passed
-    local val
-    for val in "${!_array[@]}"; do
-        PPQ "$val"; PPV ' '
-    done
-}
-PPQ(){ PPV "$(printf %q "$1")";}
-# low-level I/O without and with a terminating newline
-PPV(){ [[ -n "$PPLOG" ]] && echo -n "${1}" >>"$PPLOG" || echo -n "${1}";}
-PPN(){ [[ -n "$PPLOG" ]] && echo "${1}" >>"$PPLOG" || echo "${1}";}
 
 ############ misc
 

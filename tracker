@@ -17,7 +17,7 @@ if [[ $PATH_INFO =~ (/[~][[:alnum:]]+)?/[[:digit:]]+-[[:alnum:]]+$ ]]; then
     # log only if metafile exists: was properly created by the admin GUI
     if [[ -e "$meta" ]]; then
         date=$(date +"$dateformat")
-        clienthost=$(host "$REMOTE_ADDR")
+        clienthost=$(host "$REMOTE_ADDR" | grep "domain name pointer" | head -n 1)
         clientname=
         [[ $clienthost =~ 'domain name pointer '(.+)[.]$ ]] &&
             clientname="${BASH_REMATCH[1]}"

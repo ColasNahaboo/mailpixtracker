@@ -1,6 +1,6 @@
 #!/bin/bash
 # shellcheck disable=SC2155,SC1090
-export VERSION=3.0.0
+export VERSION=3.0.1
 export PROGNAME='Mail Pix Tracker'
 export source='https://github.com/ColasNahaboo/mailpixtracker'
 export copyright='(c)2026 Colas Nahaboo, GPL V3 License'
@@ -8,7 +8,7 @@ export copyright='(c)2026 Colas Nahaboo, GPL V3 License'
 # globals. Can be redefined in the sourced file ../mailpixtracker.conf
 configfile='../mailpixtracker.conf'
 passlen=8                # length of the random "passwords", 10^14 combinations
-declare -g root_url adminpass url urlp data nl tab sp date gid isadmin isgadmin
+declare -g root_url adminpass url urlp data nl tab sp date gid isadmin isgadmin version
 
 ###################### Common
 
@@ -71,13 +71,13 @@ is-active(){
 footer(){
     echo "<hr><div class=minicontainer>$version</div></body></html>"
 }
+# shellcheck disable=SC2120
 info(){
     # shellcheck disable=SC2154 # FORM_xxx are defined by cgibashopts
-    local mess="$FORM_info" class=info
+    local mess="${1:-$FORM_info}" class=info
     [[ -n "$mess" ]] || return
     [[ $mess =~ ^([[:alnum:]]+): ]] && class="$class ${BASH_REMATCH[1]}"
     [[ "$class" == info ]] && class="$class ok"
-    mess="${mess//_/ }"
     echo "<div class='$class'>${mess^}</div>"
 }
 redirect(){
@@ -139,7 +139,7 @@ create-id(){
     true >"$data/$idpass.log"
     set-metas name="$(html_escape "$name")" note="$(html_escape "$note")"
     meta-write-raw "$data/$idpass.meta"
-    redirect "?mode=logs&id=$id&info=new_tracker_created"
+    redirect "?mode=logs&id=$id&info=new+tracker+created"
 }
 
 ################################# Logs of ID, and other info
@@ -147,7 +147,7 @@ create-id(){
 gui-logs(){
     local id="$1" tabs="$2" meta metafile notenl notelines idpass
     metafile=("$data/$id-"*.meta); meta="${metafile[0]}"
-    [[ -e "$meta" ]] || redirect "?id=$id&info=error:_logs_unknown_id:_$id"
+    [[ -e "$meta" ]] || redirect "?id=$id&info=error:+logs+unknown+id:+$id"
     idpass="${meta##*/}"; idpass="${idpass%.*}"
     meta-read-raw "$meta"
     notenl="${metas[note]//[^$tab]/}" # keep only the newlines
@@ -217,12 +217,12 @@ save-id(){
     local id="$1" gid="$2" name="$3" note="$4" meta metas
     # shellcheck disable=SC2010,SC2012   # Allow ls instead of find
     metafile=("$data/$id-"*.meta); meta="${metafile[0]}"
-    [[ -e "$meta" ]] || redirect "?id=$id&info=error:_edit_unknown_id:_$id"
+    [[ -e "$meta" ]] || redirect "?id=$id&info=error:+edit+unknown+id:+$id"
     meta-read-raw "$meta"
     metas[name]=$(html_escape "$name")
     metas[note]=$(html_escape "$note")
     meta-write-raw "$meta"
-    redirect "?mode=logs&id=$id&info=tracker_info_edited"
+    redirect "?mode=logs&id=$id&info=tracker+info+edited"
 }
 
 ########### Delete id
@@ -231,17 +231,17 @@ del-id(){
     local id="${1//[^[:digit:]]/}" gid="${2//[^-_.[:alnum:]]/}"
     local meta metafile=("$data"/"$id"-*.meta) trash="$data/trash"
     meta="${metafile[0]}"
-    [[ -e "$meta" ]] || redirect "?info=error:_try_to_delete_unknown_tracker_id:_$id"
+    [[ -e "$meta" ]] || redirect "?info=error:+try+to+delete+unknown+tracker+id:+$id"
     mkdir -p "$trash"
     mv "$data/$id-"* "$trash"
-    redirect "?mode=trackers&info=tracker_${id}_deleted"
+    redirect "?mode=trackers&info=tracker+${id}+deleted"
 }
 
 ################################# Admin
 
 gui-admin(){
     local tabs="$1" i gid gpass gurl gnote nguests=0 admin
-    $isadmin || redirect "$url?info=error:_not_admin"
+    $isadmin || redirect "$url?info=error:+not+admin"
     header '' "$tabs"
     info
     # Section: list guest accounts
@@ -279,27 +279,27 @@ gui-admin(){
 
 create-guest(){
     local gid="${1//[^-_.[:alnum:]]/}" note="$2" gpass
-    $isadmin || redirect "$url?info=error:_not_admin" # we must be the admin
+    $isadmin || redirect "$url?info=error:+not+admin" # we must be the admin
     set-metas note="$note"
     [[ -n "$FORM_isadmin" ]] && metas[admin]=yes || metas[admin]=
-    [[ -z "$gid" ]] && redirect "?mode=admin&info=error:_invalid_guest_name"
+    [[ -z "$gid" ]] && redirect "?mode=admin&info=error:+invalid+guest+name"
     # shellcheck disable=SC2010,SC2012,SC2035   # Allow ls instead of find
     gpass=$(ls -1 *"~$gid" | grep -v '[*]' | grep -oPm1 -- '~\K[[:alnum:]]+')
-    [[ -n "$gpass" ]] && redirect "?mode=admin&info=error:_existing_guest_name"
+    [[ -n "$gpass" ]] && redirect "?mode=admin&info=error:+existing+guest+name"
     gpass=$(random_string $((passlen + 2)) )
     ln -sf "$adminpass" "$gpass~$gid"
-    mkdir "$data/~$gid"
+    mkdir -p "$data/~$gid"
     meta-write-raw "$data/~$gid"/meta
-    redirect "?mode=admin&info=guest_${gid}_created"
+    redirect "?mode=admin&info=guest+${gid}+created"
 }
 
 ################################# Edit Guest GUI
 
 gui-guest(){
     local tabs="$1" i gid="$FORM_gid"
-    $isadmin || redirect "$url?info=error:_not_admin"
+    $isadmin || redirect "$url?info=error:+not+admin"
     local meta="$data/~$gid/meta" isadmin
-    [[ -e "$meta" ]] || redirect "?mode=admin&info=error:_edit_unknown_guest_id:_$gid"
+    [[ -e "$meta" ]] || redirect "?mode=admin&info=error:+edit+unknown+guest+id:+$gid"
     header '' "$tabs"
     info
     meta-read-raw "$meta"
@@ -328,12 +328,12 @@ gui-guest(){
 save-guest(){
     local gid="${1//[^-_.[:alnum:]]/}" name="$2" note="$3" admin="$4"
     local meta="$data/~$gid/meta"
-    [[ -e "$meta" ]] || redirect "?mode=admin&info=error:_try_to_save_unknown_guest_id:_$gid"
+    [[ -e "$meta" ]] || redirect "?mode=admin&info=error:+try+to+save+unknown+guest+id:+$gid"
     meta-read-raw "$meta"
     metas[note]="$note"
     metas[admin]="$admin"
     meta-write-raw "$meta"
-    redirect "?mode=admin&info=guest_${gid}_saved"
+    redirect "?mode=admin&info=guest+${gid}+saved"
 }
 
 ########### Delete guest
@@ -341,12 +341,12 @@ save-guest(){
 del-guest(){
     local gid="${1//[^-_.[:alnum:]]/}" name="$2" note="$3" admin="$4"
     local meta="$data/~$gid/meta" trash="$data/trashguests"
-    [[ -e "$meta" ]] || redirect "?mode=admin&info=error:_try_to_delete_unknown_guest_id:_$gid"
+    [[ -e "$meta" ]] || redirect "?mode=admin&info=error:+try+to+delete+unknown+guest+id:+$gid"
     mkdir -p "$trash"/{cgi,data}
     rm -rf "$trash/cgi/"[a-zA-Z0-9]*"~$gid" "$trash/data/~$gid"
     mv [a-zA-Z0-9]*"~$gid" "$trash/cgi"
     mv "$data/~$gid" "$trash/data"
-    redirect "?mode=admin&info=guest_${gid}_deleted"
+    redirect "?mode=admin&info=guest+${gid}_deleted"
 }
 
 ################################# Misc utils
@@ -434,7 +434,7 @@ meta-write-raw(){
 }
 
 # to clear the metadata
-meta-reset(){ local _m="${2:-metas}"; unset "$_m"; declare -Ag "$_m";}
+meta-reset(){ local _m="${1:-metas}"; unset "$_m"; declare -Ag "$_m";}
 
 ############ misc
 

@@ -126,6 +126,7 @@ Logs are lines of 4 tab-separated values: date, ip-adress, adress-name, user-age
 
 ## History
 
+- v3.0.2 2027-03-14 small usability change: in the main "trackers" view, show the tracker creation form first, and then list the existing trackers most recent first.
 - v3.0.1 2027-02-10 minor bug fixes
 - v3.0.0 2027-03-09 Version 3 introduces:
   - a robust multi-user (Guest) system

@@ -1,6 +1,6 @@
 #!/bin/bash
 # shellcheck disable=SC2155,SC1090
-export VERSION=3.0.1
+export VERSION=3.0.2
 export PROGNAME='Mail Pix Tracker'
 export source='https://github.com/ColasNahaboo/mailpixtracker'
 export copyright='(c)2026 Colas Nahaboo, GPL V3 License'
@@ -91,11 +91,21 @@ gui-trackers(){
     local tabs="$1" idpass id idpass idname last # idpass=NN-nnpass
     header '' "$tabs"
     info
+    # Section: create a new tracker
+    echo "<form method=POST enctype='multipart/form-data' class=container>
+          Create a new tracker to insert in emails:<p>
+          <input type=hidden name=newid value=true>
+          <input type=hidden name=gid value='${gid#/~}'>
+          <table>
+          <tr><td>Name:<td><input type=text name=name size=48 value=''>
+          <tr><td>Note:<td><textarea name=note rows=3 cols=64></textarea>
+          <tr><td colspan=2><input class='btn' type='submit' value='Create'>
+          </table></form>"
     # Section: list existing trackers
     if [[ -d "$data" ]]; then
         echo "<div class=container>Existing trackers:<ul>"
         # shellcheck disable=SC2010,SC2012   # Allow ls instead of find
-        for meta in "$data"/[0-9]*.meta; do
+        while read -r  meta; do
             [[ -e "$meta" ]] || continue
             idpass="${meta##*/}"; idpass="${idpass%.*}"
             id="${idpass%%-*}"
@@ -110,19 +120,9 @@ gui-trackers(){
             else
                 echo " <span class=guest>(no access logs yet)</span>"
             fi                  
-        done
+        done < <(ls -- "$data/"*.meta | sort -Vr)
         echo "</ul></div>"
     fi
-    # Section: create a new tracker
-    echo "<form method=POST enctype='multipart/form-data' class=container>
-          Create a new tracker to insert in emails:<p>
-          <input type=hidden name=newid value=true>
-          <input type=hidden name=gid value='${gid#/~}'>
-          <table>
-          <tr><td>Name:<td><input type=text name=name size=48 value=''>
-          <tr><td>Note:<td><textarea name=note rows=3 cols=64></textarea>
-          <tr><td colspan=2><input class='btn' type='submit' value='Create'>
-          </table></form>"
     footer
 }
 

@@ -142,11 +142,11 @@ If you would like to use another open-source license instead, please contact me.
 
 ## History
 
-- v3.0.2 2027-03-14
+- v3.0.2 2026-03-14
   - switched to a multi-license
   - small usability change: in the main "trackers" view, show the tracker creation form first, and then list the existing trackers most recent first.
-- v3.0.1 2027-02-10 minor bug fixes
-- v3.0.0 2027-03-09 Version 3 introduces:
+- v3.0.1 2026-02-10 minor bug fixes
+- v3.0.0 2026-03-09 Version 3 introduces:
   - a robust multi-user (Guest) system
   - a cleaner, more modern UI
   - code refactoring, and data reorganisation for a cleaner separation between the web-accessible scripts and private tracking data

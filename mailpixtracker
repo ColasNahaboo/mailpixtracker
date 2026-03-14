@@ -4,6 +4,7 @@ export VERSION=3.0.2
 export PROGNAME='Mail Pix Tracker'
 export source='https://github.com/ColasNahaboo/mailpixtracker'
 export copyright='(c)2026 Colas Nahaboo, GPL V3 License'
+# SPDX-License-Identifier: MIT OR Apache-2.0 OR MPL-2.0 OR LGPL-3.0-only OR GPL-3.0-only
 
 # globals. Can be redefined in the sourced file ../mailpixtracker.conf
 configfile='../mailpixtracker.conf'

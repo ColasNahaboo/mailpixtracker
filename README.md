@@ -120,13 +120,31 @@ Metadata — bash Associatrive Arrays — are stored in "bash native" format via
 
 Logs are lines of 4 tab-separated values: date, ip-adress, adress-name, user-agent.
 
-## License: GPL V3 (c) 2025 Colas Nahaboo
+## License
 
-[GitHub Source repository](https://github.com/ColasNahaboo/mailpixtracker)
+This project is **multi-licensed**. You are free to redistribute it and/or modify it under the terms of **any one** of the following licenses of **your choice**:
+
+- **[MIT](https://opensource.org/licenses/MIT):** The simplest, most permissive option. Just keep the copyright notice.
+
+- **[Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0):** Permissive like MIT, but includes explicit protection against patent litigation.
+
+- **[MPL 2.0](https://www.mozilla.org/en-US/MPL/2.0/):** The "middle ground." If you modify files in this project, you must share those specific changes, but you can keep the rest of your project private.
+
+- **[LGPL v3](https://www.gnu.org/licenses/lgpl-3.0.html):** Allows you to link this code into a private project without opening your own code, as long as the user can still replace this library with their own version.
+
+- **[GPL v3](https://www.gnu.org/licenses/gpl-3.0.html):** The "Strong Copyleft" option. If you use this code in a project you distribute, your entire project must also be open source.
+
+**Which one should I use?** If you aren't sure, the **MIT** license is the most flexible for most users. If you are integrating this into an existing open-source project, choose the license that matches that project's existing terms.
+
+If you would like to use another open-source license instead, please contact me.
+
+(c) 2025 Colas Nahaboo, https://colas.nahaboo.net
 
 ## History
 
-- v3.0.2 2027-03-14 small usability change: in the main "trackers" view, show the tracker creation form first, and then list the existing trackers most recent first.
+- v3.0.2 2027-03-14
+  - switched to a multi-license
+  - small usability change: in the main "trackers" view, show the tracker creation form first, and then list the existing trackers most recent first.
 - v3.0.1 2027-02-10 minor bug fixes
 - v3.0.0 2027-03-09 Version 3 introduces:
   - a robust multi-user (Guest) system

@@ -142,6 +142,7 @@ If you would like to use another open-source license instead, please contact me.
 
 ## History
 
+- v3.0.3 2026-03-25 "copy icon" button to copy the HTML to include in the mail
 - v3.0.2 2026-03-14
   - switched to a multi-license
   - small usability change: in the main "trackers" view, show the tracker creation form first, and then list the existing trackers most recent first.

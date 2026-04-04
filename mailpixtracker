@@ -1,6 +1,6 @@
 #!/bin/bash
 # shellcheck disable=SC2155,SC1090
-export VERSION=3.0.3
+export VERSION=3.0.4
 export PROGNAME='Mail Pix Tracker'
 export source='https://github.com/ColasNahaboo/mailpixtracker'
 export copyright='(c)2026 Colas Nahaboo, GPL V3 License'
@@ -94,7 +94,7 @@ gui-trackers(){
     header '' "$tabs"
     info
     # Section: create a new tracker
-    echo "<form method=POST enctype='multipart/form-data' class=container>
+    echo "<for mkmethod=POST class=container>
           Create a new tracker to insert in emails:<p>
           <input type=hidden name=newid value=true>
           <input type=hidden name=gid value='${gid#/~}'>
@@ -204,7 +204,7 @@ gui-logs(){
 	echo "No access logs yet"
     fi
     echo "</div>"
-    echo "<form method=POST enctype='multipart/form-data' class=container>
+    echo "<form method=POST class=container>
           You can also delete this tracker and log, if you are <b>sure</b> you have not yet used it:<p>
           <input type=hidden name=delid value='$id'>
           <input type=hidden name=gid value='${gid#/~}'>
@@ -263,7 +263,7 @@ gui-admin(){
     echo "</ul></div>"
     # Section: create a new guest
     echo "<div container>
-          <form method=POST enctype='multipart/form-data' class=container>
+          <form method=POST class=container>
           Create a new guest account:<p>
           <table>
           <tr><td>Name:<td><input type=text name=newguest size=12 value=''>
@@ -307,7 +307,7 @@ gui-guest(){
     meta-read-raw "$meta"
     [[ -n "${metas[admin]}" ]] && isadmin=checked
     # Section: Edit guest
-    echo "<form method=POST enctype='multipart/form-data' class=container>
+    echo "<form method=POST class=container>
           Edit guest account $gid:<p>
           <input type=hidden name=savegid value='$gid'>
           <table>
@@ -317,7 +317,7 @@ gui-guest(){
           <td><i>(has a tab to go to the admin account)</i>
           <tr><td colspan=3><input class='btn' type='submit' value='Save'>
           </table></form>"
-    echo "<form method=POST enctype='multipart/form-data' class=container>
+    echo "<form method=POST class=container>
           Or delete guest account $gid:<p>
           <input type=hidden name=delgid value='$gid'>
           <input class='btn' type='submit' value='Delete'>

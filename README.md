@@ -105,6 +105,7 @@ passlen=12
 │   ├── 9FwQ1rnIhD~Anna     # symlink to gZu2SpMbpJ. Anna's guest account
 │   └── PZdn7Lz7a7~Bob      # symlink to gZu2SpMbpJ. Bob's guest account
 └── data/                   # Writable by www-data (logs and metadata)
+    ├── meta                # global metadata (cached client timezones)
     ├── trash/              # "deleted" trackers and accounts are moved there
     ├── 12~I5rHJCFap.log    # access logs for tracker #12
     ├── 12~I5rHJCFap.meta   # metadata (name, note, ...) for tracker #12
@@ -142,6 +143,7 @@ If you would like to use another open-source license instead, please contact me.
 
 ## History
 
+- v3.0.5 2026-04-10 displayed dates are now in the timezone of the client browser, not anymore in the timezone of the server
 - v3.0.4 2026-04-04 some clean of the html
 - v3.0.3 2026-03-25 "copy icon" button to copy the HTML to include in the mail
 - v3.0.2 2026-03-14

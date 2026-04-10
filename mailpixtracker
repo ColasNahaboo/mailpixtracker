@@ -1,6 +1,6 @@
 #!/bin/bash
 # shellcheck disable=SC2155,SC1090
-export VERSION=3.0.4
+export VERSION=3.0.5
 export PROGNAME='Mail Pix Tracker'
 export source='https://github.com/ColasNahaboo/mailpixtracker'
 export copyright='(c)2026 Colas Nahaboo, GPL V3 License'
@@ -9,7 +9,7 @@ export copyright='(c)2026 Colas Nahaboo, GPL V3 License'
 # globals. Can be redefined in the sourced file ../mailpixtracker.conf
 configfile='../mailpixtracker.conf'
 passlen=8                # length of the random "passwords", 10^14 combinations
-declare -g root_url adminpass url urlp data nl tab sp date gid isadmin isgadmin version
+declare -g root_url adminpass url urlp data nl tab sp date gid isadmin isgadmin version servertzone clienttzone dateformat
 
 ###################### Common
 
@@ -21,6 +21,19 @@ init(){
     data=$(realpath '../data')       # metadata, logs, caches, guest ids...
     nl=$'\n'; tab=$'\t'; sp='&nbsp;' # some useful constants
     version="<p class=version><a href='$source'>${source##*/}</a> v$VERSION, $copyright</p>"
+
+    servertzone=$(timedatectl|grep -oP 'Time zone: *\K[^, (]*')
+    dateformat='%Y-%m-%d.%Hh%M,%S' # dates format in logs. ISO-ish but readable 
+    meta-read-raw "$data/meta"
+    if [[ -z "${metas[tzone-$REMOTE_ADDR]}" ]]; then
+        clienttzone=$(get-client-tzone "$REMOTE_ADDR")
+        [[ -z "$clienttzone" ]] && clienttzone="$servertzone"
+        metas[tzone-$REMOTE_ADDR]="$clienttzone"
+        meta-write-raw "$data/meta" # cache it
+    else
+        clienttzone="${metas[tzone-$REMOTE_ADDR]}"
+    fi
+
     # are we the admin, or a guest account?
     if [[ $SCRIPT_NAME =~ /([[:alnum:]]+)([~][-_.[:alnum:]]+)$ ]]; then
         gid="/${BASH_REMATCH[2]}"       # guest id, in the form "/~guestid"
@@ -69,6 +82,11 @@ header(){
 }
 is-active(){
     [[ "$1" == "$2" ]] && echo " active"
+}
+get-client-tzone(){
+    local ip="$1"
+    [[ $ip =~ ^(192\.168|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.) ]] && ip=
+    curl -s "http://ip-api.com/line/$ip?fields=timezone"
 }
 footer(){
     echo "<hr><div class=minicontainer>$version</div></body></html>"
@@ -173,26 +191,29 @@ gui-logs(){
         </table></form>
         <h2>Access logs</h2>"
     if [[ -s "$data/$idpass.log" ]]; then
-        local line date hip host agent
+        local line rdate idate sdate date hip host agent
         echo "<table class=mptlog>
         <tr><th>Date<th>IP address<th>Hostname<th>User Agent"
         # init first IP (ours) to grey color
         rowcolor "$(head -1 "$data/$idpass.log" | cut -d $'\t' -f 2)"
 	while read -r line; do
-            date=
+            sdate=
             if [[ $line =~ ^([^$tab]+)$tab([^$tab]+)$tab([^$tab]*)$tab(.*) ]]; then
-                date="${BASH_REMATCH[1]}"
+                rdate="${BASH_REMATCH[1]}"
                 hip="${BASH_REMATCH[2]}"
                 host="${BASH_REMATCH[3]}"
                 agent="${BASH_REMATCH[4]}"
             # legacy v1 format line for backcompat
             elif [[ $line =~ ^(.+)\ \[([.[:digit:]]+)\]\ [(]([^\)]*)[)]\ -\ (.*) ]]; then
-                date="${BASH_REMATCH[1]}"
+                rdate="${BASH_REMATCH[1]}"
                 hip="${BASH_REMATCH[2]}"
                 host="${BASH_REMATCH[3]}"
                 agent="${BASH_REMATCH[4]}"
             fi
-            if [[ -n "$date" ]]; then
+            if [[ -n "$rdate" ]]; then
+                idate="$(tr '.h,' 'T::' <<<"$rdate")"
+                sdate=$(date -d "$idate" +'%Y-%m-%d %H:%M:%S %z')
+                date=$(TZ="$clienttzone" date -d "$sdate" +"$dateformat") 
                 rowcolor "$hip"  # sets color
                 echo "<tr style='background-color:$color'><td><b>$date</b><td>$hip<td><i>$host</i><td class=useragent>$agent</small></tr>"
             else                # unknown format

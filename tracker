@@ -1,10 +1,9 @@
 #!/bin/bash
-# VERSION 3.0.0
+# VERSION 3.1.0
 # source: 'https://github.com/ColasNahaboo/mailpixtracker'
 ################################# TRACKER: provide a 1x1 pixel, logs the access
 
 nl=$'\n';  tab=$'\t'           # some useful constants
-dateformat='%Y-%m-%d.%Hh%M,%S' # dates format in logs. ISO-ish but readable 
 pixel=../data/p.png
 # cache 1x1 transparent pixel PNG if needed
 [[ -e "$pixel" ]] ||
@@ -16,7 +15,7 @@ if [[ $PATH_INFO =~ (/[~][[:alnum:]]+)?/[[:digit:]]+-[[:alnum:]]+$ ]]; then
     meta=../data"$PATH_INFO".meta
     # log only if metafile exists: was properly created by the admin GUI
     if [[ -e "$meta" ]]; then
-        date=$(date +"$dateformat")
+        date=$(date --iso=seconds -u)
         clienthost=$(host "$REMOTE_ADDR" | grep -oP 'domain name pointer +\K.*' | head -n 1)
         echo "$date${tab}$REMOTE_ADDR${tab}${clienthost%.}${tab}$HTTP_USER_AGENT" >>"${meta%.meta}".log
     fi

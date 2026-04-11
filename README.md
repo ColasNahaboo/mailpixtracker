@@ -142,7 +142,8 @@ If you would like to use another open-source license instead, please contact me.
 (c) 2025 Colas Nahaboo, https://colas.nahaboo.net
 
 ## History
-
+- v3.1.0 2026-04-11 dates are now stored in logs as UTC ISO.
+  Was YYYY-MM-DD.HHhMM,SS in the server local time, but still work. 
 - v3.0.5 2026-04-10 displayed dates are now in the timezone of the client browser, not anymore in the timezone of the server
 - v3.0.4 2026-04-04 some clean of the html
 - v3.0.3 2026-03-25 "copy icon" button to copy the HTML to include in the mail

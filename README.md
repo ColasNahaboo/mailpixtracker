@@ -93,6 +93,23 @@ passlen=12
 - Rename `tracker` as `_`
 - If using a webmail, I recommend installing a browser extension to allow easy inclusion of the generated tracker HTML code in your emails. For GMail, you can use the HTMail extension for [Firefox](https://addons.mozilla.org/en-US/firefox/addon/htmail/) or [Chrome](https://chromewebstore.google.com/detail/htmail-insert-html-into-g/omojcahabhafmagldeheegggbakefhlh?hl=en).
 
+### Geolocalization
+
+Optionally, you can have the host gelocalized when displaying logs. Just install the [MaxMind](https://www.maxmind.com) GeoIp databases.
+If you already have them installed, they will be auto-detected and used if present at `/var/lib/GeoIP/GeoLite2-City.mmdb` and `/var/lib/GeoIP/GeoLite2-ASN.mmdb`. If they reside elsewhere, set the variables `geoipcity` and `geoipasn` in the configuration file.
+
+To install them if you do not already have them on your ser ver:
+1. [SignUp](https://www.maxmind.com/en/geolite2/signup) for a free account
+2. Generate a License Key in your account dashboard. Download the provided config file and copy it in =/etc/GeoIP.conf= on your server.
+3. Install the `mmlookup` and `geoipupdate` utilities. In Debian/Ubuntu systems: `sudo apt install geoipupdate mmdb-bin`
+4. Run `sudo geoipupdate`
+5. add a weekly update of the database in root crontab:\
+   `0 12 * * 3 geoipupdate`
+
+### Updating
+
+To update, just re-clone the repository and re-copy the `mailpixtracker` and `tracker` into the same local names as done in the initial installation above.
+
 ### Data structure and Implementation
 
 ```text
@@ -142,8 +159,10 @@ If you would like to use another open-source license instead, please contact me.
 (c) 2025 Colas Nahaboo, https://colas.nahaboo.net
 
 ## History
+
 - v3.1.0 2026-04-11 dates are now stored in logs as UTC ISO.
   Was YYYY-MM-DD.HHhMM,SS in the server local time, but still work. 
+  Optionally the host are geolocalized (organisation & country) in log display.
 - v3.0.5 2026-04-10 displayed dates are now in the timezone of the client browser, not anymore in the timezone of the server
 - v3.0.4 2026-04-04 some clean of the html
 - v3.0.3 2026-03-25 "copy icon" button to copy the HTML to include in the mail

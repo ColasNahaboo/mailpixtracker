@@ -193,13 +193,13 @@ gui-logs(){
         </table></form>
         <h2>Access logs</h2>"
     if [[ -s "$data/$idpass.log" ]]; then
-        local line rdate idate sdate date hip host agent
+        local line rdate idate sdate date hip host qhost agent qagent
         echo "<table class=mptlog>
         <tr><th>Date<th>IP address<th>Hostname<th>User Agent"
         # init first IP (ours) to grey color
         rowcolor "$(head -1 "$data/$idpass.log" | cut -d $'\t' -f 2)"
 	while read -r line; do
-            sdate=
+            rdate=
             if [[ $line =~ ^([^$tab]+)$tab([^$tab]+)$tab([^$tab]*)$tab(.*) ]]; then # v2/v3 format
                 rdate="${BASH_REMATCH[1]}"
                 hip="${BASH_REMATCH[2]}"
@@ -217,9 +217,14 @@ gui-logs(){
             elif (( ${#rdate} == 19 )); then # v2 format
                 idate="$(tr '.h,' 'T::' <<<"$rdate")"
                 sdate=$(date -d "$idate" +'%Y-%m-%d %H:%M:%S %z')
-                date=$(TZ="$clienttzone" date -d "$sdate" +"$dateformat") 
-                rowcolor "$hip"  # sets color
-                echo "<tr style='background-color:$color'><td><b>$date</b><td>$hip<td><i>$host</i><td class=useragent>$agent</small></tr>"
+                date=$(TZ="$clienttzone" date -d "$sdate" +"$dateformat")
+            fi
+            rowcolor "$hip"  # sets color
+            if [[ -n "$rdate" ]]; then
+                qhost=$(htmlencode "$host")
+                qagent=$(htmlencode "$agent")
+                [[ "$hip" == "$REMOTE_ADDR" ]] && qhost="<b>MySelf</b> $qhost"
+                echo "<tr style='background-color:$color'><td><b>$date</b><td>$hip<td><i>$qhost</i><td class=useragent>$qagent</small></tr>"
             else                # unknown format
                 echo "<tr style='background-color:$rowscolxtra'><td colspan=4>${line}"
             fi
@@ -471,6 +476,11 @@ html_escape() {
     s=${s//&/\&amp;}; s=${s//</\&lt;}; s=${s//>/\&gt;}
     s=${s//\"/\&quot;}; s=${s//\'/\&#39;}; s="${s//$nl/$tab}"
     printf '%s' "$s"
+}
+
+htmlencode() {
+    local str="${1//&/\&amp;}"; str="${str//</\&lt;}"; str="${str//>/\&gt;}"
+    str="${str//\"/\&quot;}"; echo "${str//\'/\&#39;}"
 }
 
 # returns a random alphanumeric string of N chars, non-nl-terminated

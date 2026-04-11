@@ -193,7 +193,7 @@ gui-logs(){
         </table></form>
         <h2>Access logs</h2>"
     if [[ -s "$data/$idpass.log" ]]; then
-        local line rdate idate sdate date hip host qhost agent qagent
+        local line rdate idate sdate date ip host qhost agent qagent
         echo "<table class=mptlog>
         <tr><th>Date<th>IP address<th>Hostname<th>User Agent"
         # init first IP (ours) to grey color
@@ -202,13 +202,13 @@ gui-logs(){
             rdate=
             if [[ $line =~ ^([^$tab]+)$tab([^$tab]+)$tab([^$tab]*)$tab(.*) ]]; then # v2/v3 format
                 rdate="${BASH_REMATCH[1]}"
-                hip="${BASH_REMATCH[2]}"
+                ip="${BASH_REMATCH[2]}"
                 host="${BASH_REMATCH[3]}"
                 agent="${BASH_REMATCH[4]}"
             # legacy v1 format line for backcompat
             elif [[ $line =~ ^(.+)\ \[([.[:digit:]]+)\]\ [(]([^\)]*)[)]\ -\ (.*) ]]; then
                 rdate="${BASH_REMATCH[1]}"
-                hip="${BASH_REMATCH[2]}"
+                ip="${BASH_REMATCH[2]}"
                 host="${BASH_REMATCH[3]}"
                 agent="${BASH_REMATCH[4]}"
             fi
@@ -219,12 +219,12 @@ gui-logs(){
                 sdate=$(date -d "$idate" +'%Y-%m-%d %H:%M:%S %z')
                 date=$(TZ="$clienttzone" date -d "$sdate" +"$dateformat")
             fi
-            rowcolor "$hip"  # sets color
+            rowcolor "$ip"  # sets color
             if [[ -n "$rdate" ]]; then
-                qhost=$(htmlencode "$host")
+                qhost="$(geolocalization "$ip")$(htmlencode "$host")"
                 qagent=$(htmlencode "$agent")
-                [[ "$hip" == "$REMOTE_ADDR" ]] && qhost="<b>MySelf</b> $qhost"
-                echo "<tr style='background-color:$color'><td><b>$date</b><td>$hip<td><i>$qhost</i><td class=useragent>$qagent</small></tr>"
+                [[ "$ip" == "$REMOTE_ADDR" ]] && qhost="<b>MySelf</b> $qhost"
+                echo "<tr style='background-color:$color'><td><b>$date</b><td>$ip<td><i>$qhost</i><td class=useragent>$qagent</small></tr>"
             else                # unknown format
                 echo "<tr style='background-color:$rowscolxtra'><td colspan=4>${line}"
             fi
@@ -494,6 +494,19 @@ set-metas(){
     for i in "$@"; do
         metas[${i%%=*}]="${i#*=}"
     done
+}
+
+geolocalization(){
+    local ip="$1" asn cn
+    [[ -e /var/lib/GeoIP/GeoLite2-ASN.mmdb ]] &&
+        asn=$(mmdblookup --file /var/lib/GeoIP/GeoLite2-ASN.mmdb --ip "$ip" "autonomous_system_organization")
+    [[ -e /var/lib/GeoIP/GeoLite2-City.mmdb ]] &&
+        cn=$(mmdblookup --file /var/lib/GeoIP/GeoLite2-City.mmdb --ip "$ip" country names en)
+    [[ $asn =~ ^[[:space:]]*\"(.*)\"[[:space:]]*(\<.*\>)[[:space:]]*$ ]] &&
+        asn="${BASH_REMATCH[1]}"
+    [[ $cn =~ ^[[:space:]]*\"(.*)\"[[:space:]]*(\<.*\>)[[:space:]]*$ ]] &&
+        cn="${BASH_REMATCH[1]}"
+    echo "$asn${asn:+, }$cn${cn:+.} "
 }
 
 ###################### CSS Style

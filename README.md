@@ -35,6 +35,7 @@ Note that the tracking is not foolproof. Most mailers nowadays prompt the user b
 - Admin can create Guest accounts. Guests access a restricted dashboard via a unique URL: `https://my.mailpixtracker.org/guestpassword~guestname`
   The guest password is randomly generated and assigned, but the admin can choose meaningful guest names.
 - The admin then just communicate to the guest his URL, and by using it he cannot get to the admin account, except if the account was created with the "admin" option set, in which case the guest will have an "admin" tab linking to the admin account
+- Admin guest accounts are thus very useful to create separate namespace that you can use yourself when managing trackers for different purposes (e.g. work, family, surfing, gaming...).
 - Non-admin guests can only see and manage trackers they have created.
 
 ## Example
